@@ -2,23 +2,30 @@
 
 
 using UnityEngine;
+using Random = System.Random;
 
 public class Util
 {
 
-    private static Util _thisInstance;
+    private static Util _instance;
+    private Random random = new();
     
-    public static Util _instance
+    public static Util instance
     {
         get
         {
-            if (_thisInstance == null)
+            if (_instance == null)
             {
-                _thisInstance = new Util();
+                _instance = new Util();
             }
 
-            return _thisInstance;
+            return _instance;
         }
+    }
+
+    public bool GetRandomBool()
+    {
+        return random.Next(2) == 0;
     }
 
 }

@@ -8,83 +8,61 @@ using UnityEngine;
 public class SphereController : MonoBehaviour
 {
     // Единственный экземпляр синглтона
-    public static SphereController _instance { get; private set; }
+    public static SphereController instance { get; private set; }
+    public static GameObject sphere;
+    public static Action onBallCollision;
 
-    private SphereService _sphereService = SphereService._instance;
+    private SphereService sphereService = SphereService.instance;
 
-    [SerializeField] private bool _isLeft = true;
-    [SerializeField] private float _sphereSpeed = 5f;
-
-    public GameObject _sphere;
-    public GameObject _platform;
-    public CinemachineFreeLook _cinemachineFreeLook;
-
-    private Rigidbody _sphereRigitbody;
+    public bool isLeft = true;
+    public float sphereSpeed = 5f;
+    public GameObject platform;
+        
+    private Rigidbody sphereRigitbody;
 
     public float SphereSpeed
     {
-        get { return _sphereSpeed; }
-        set { _sphereSpeed = value; }
+        get { return sphereSpeed; }
+        set { sphereSpeed = value; }
     }
 
     public bool IsLeft
     {
-        get { return _isLeft; }
-        set { _isLeft = value; }
+        get { return isLeft; }
+        set { isLeft = value; }
     }
 
     private void Awake()
     {
         CreateSingleton();
-        /*InitializeSingletonInOtherClasses();*/
-        _sphereRigitbody = _sphere.GetComponent<Rigidbody>();
+        sphere = gameObject;
+        sphereRigitbody = sphere.GetComponent<Rigidbody>();
     }
 
     private void CreateSingleton() // Создание экземпляра
     {
-        if (_instance == null)
+        if (instance == null)
         {
-            _instance = this;
+            instance = this;
             DontDestroyOnLoad(gameObject);
             return;
         }
         Destroy(gameObject);
-    }/*
-
-    private void InitializeSingletonInOtherClasses() // Инициализация
-    {
-        SphereService._instance.InitializeSingleton();
-    }*/
-
-    private void FixedUpdate()
-    {
-        if (PlayButton.isPlay)
-        {
-            MoveSphere();
-        }
-    }private void Update()
-    {
-        if (PlayButton.isPlay)
-        {
-            TouchDetector();
-        }
     }
 
-    private void TouchDetector()
+    private void FixedUpdate() // Для плавности движения
     {
-        if (Input.GetMouseButtonDown(0))
+        if (GameController.playCondition)
         {
-            _sphereService.ToggleBoolean();
+            MoveSphere(); 
         }
     }
 
     private void MoveSphere()
     {
-        if (_sphereRigitbody != null && _platform != null)
+        if (sphereRigitbody != null && platform != null)
         {
-            //_sphereService.MoveSphereWithVelocity(_sphereRigitbody, _platform);
-            //_sphereService.MoveSphereWithForce(_sphereRigitbody, _platform);
-            _sphereService.MoveSphereWithTransform(_sphere, _platform);
+            sphereService.MoveSphereWithTransform(sphere, platform);
         }
         else
         {
@@ -93,8 +71,13 @@ public class SphereController : MonoBehaviour
     }
     
     private void OnCollisionEnter(Collision collision)
-    {
+    { // Столкновение шара с платформой
         Debug.Log("Collision!");
-        _cinemachineFreeLook.enabled = true;
+        onBallCollision?.Invoke();
+    }
+
+    public bool SphereOutOfPlatform()
+    {
+        return sphereService.SphereOutOfPlatform(sphere, platform);
     }
 }

@@ -16,7 +16,7 @@ public class SphereDraft
                                      * SphereController._instance.SphereSpeed;
             sphereRigitbody.velocity = targetVelocity;
         }
-    }*/
+    }*/ 
 
     /*// Movement with force
     public void MoveSphereWithForce(Rigidbody sphereRigitbody, GameObject platform)
