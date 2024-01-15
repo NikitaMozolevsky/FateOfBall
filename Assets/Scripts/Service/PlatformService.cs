@@ -220,6 +220,11 @@ public class PlatformService
         platform.GetComponent<Rigidbody>().isKinematic = false;
     }
 
+    private void DeleteFromList(GameObject platform, List<GameObject> platformList)
+    {
+        platformList.Remove(platform);
+    }
+
     public void PassedPlatformManager(Collision collision)
     {
         GameObject platform = collision.gameObject;

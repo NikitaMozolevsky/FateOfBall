@@ -46,6 +46,7 @@ public class PlatformController : MonoBehaviour
     {
         onNewGame += PreparePlatformGenerator;
         ActionPlayButton.onPlay += RemoveFirstPlatform;
+        // Уничтожение невидимых платформ (с багом)
         //GameController.onLose += DestroyInvisiblePlatforms;
     }
 
@@ -122,10 +123,12 @@ public class PlatformController : MonoBehaviour
 
     private void DestroyInvisiblePlatforms()
     {
+        viewPanel.SetActive(true);
         foreach (var platform in platformList)
         {
             platformService.DestroyPlatformIfInvisible(platform, viewPanel);
         }
+        viewPanel.SetActive(false);
     }
 
     public void GenerateByTransformPointCollision()
