@@ -9,11 +9,18 @@ public class GameController : MonoBehaviour
     
     public static GameController instance { get; private set; }
     public static Action onLose; // Выход за пределы.
+    // Становится true при нажатии play.
     public static bool playCondition = false;
     public static bool loseCondition = false;
+    public static bool menuCondition = true;
+    public static bool pauseCondition = false;
 
     private int stopTime = 0;
     private int continueTime = 1;
+
+    private GameController()
+    {
+    }
 
     private void Awake()
     {
@@ -35,16 +42,20 @@ public class GameController : MonoBehaviour
     {
         ActionPauseButton.onPauseGame += PauseOn;
         ActionContinueButton.onContinueGame += PauseOff;
-        ActionPlayButton.onPlay += Play;
-        ActionRestartButton.onRestartGame += ResetBoolVariables;
+        ActionPlayButton.onPlay += ResetOnPlayBoolVariables;
+        ActionRestartButton.onRestartGame += ResetOnRestartBoolVariables;
+        onLose -= ResetOnLoseBoolVariables;
+        
     }
 
     private void OnDisable()
     {
         ActionPauseButton.onPauseGame -= PauseOn;
         ActionContinueButton.onContinueGame -= PauseOff;
-        ActionPlayButton.onPlay -= Play;
-        onLose -= ResetBoolVariables;
+        ActionPlayButton.onPlay += ResetOnPlayBoolVariables;
+        ActionRestartButton.onRestartGame += ResetOnRestartBoolVariables;
+        onLose -= ResetOnLoseBoolVariables;
+        
     }
     
     private void Update()
@@ -61,11 +72,6 @@ public class GameController : MonoBehaviour
     {
         Time.timeScale = continueTime;
     }
-
-    private void Play()
-    {
-        playCondition = true;
-    }
     
     private void OnLose()
     {
@@ -77,9 +83,18 @@ public class GameController : MonoBehaviour
         }
     }
 
-    private void ResetBoolVariables()
-    { // Устанавливает переменным значения которые были во время запуска игры
-        // Для того что бы начать игру заново
-        PlatformService.firstPlatformsRaised = false;
+    private void ResetOnPlayBoolVariables()
+    { // Устанавливает bool переменным соответствующие значения
+        playCondition = true;
+    }
+
+    private void ResetOnRestartBoolVariables()
+    { // Устанавливает bool переменным соответствующие значения
+        
+    }
+    
+    private void ResetOnLoseBoolVariables()
+    { // Устанавливает bool переменным соответствующие значения
+        
     }
 }

@@ -18,7 +18,14 @@ public class CameraController : MonoBehaviour
     public float transitionDuration = 5f;
     public int highPriority = 11;
     public int lowPriority = 9;
-    
+
+    // Первое ли это касание
+    private bool firstTouch = true;
+
+    private CameraController()
+    {
+    }
+
     private void CreateSingleton() // Создание экземпляра
     {
         if (instance == null)
@@ -47,7 +54,7 @@ public class CameraController : MonoBehaviour
         GameController.onLose += PauseColorChanger;
         GameController.onLose += CreateLosePoint;
         GameController.onLose += FreezeCamera;
-        SphereController.onBallCollision += UnfreezeCamera;
+        //SphereController.onBallCollision += UnfreezeCamera;
     }
 
     private void OnDisable()
@@ -61,15 +68,20 @@ public class CameraController : MonoBehaviour
         GameController.onLose -= PauseColorChanger;
         GameController.onLose -= CreateLosePoint;
         GameController.onLose -= FreezeCamera;
-        SphereController.onBallCollision -= UnfreezeCamera;
+        //SphereController.onBallCollision -= UnfreezeCamera;
         
     }
 
     private void SetPriorityToSphereCamera()
-    { // Смена еамеры на привязанную к шару
-        sphereCamera.m_Priority = highPriority;
-        startPositionCamera.m_Priority = lowPriority;
-        
+    { // Смена еамеры на привязанную к шару если это первое касание
+        if (firstTouch)
+        {
+            sphereCamera.LookAt = SphereController.sphere.transform;
+            sphereCamera.Follow = SphereController.sphere.transform;
+            sphereCamera.m_Priority = highPriority;
+            startPositionCamera.m_Priority = lowPriority;
+            firstTouch = false;
+        }
     }
 
     private void SetPriorityToStartPointCamera()
@@ -94,16 +106,16 @@ public class CameraController : MonoBehaviour
     }
 
     private void FreezeCamera()
-    {
+    { // Замораживает камеру во время поражения на losePoint
         sphereCamera.LookAt = losePoint;
         sphereCamera.Follow = losePoint;
     }
 
-    private void UnfreezeCamera()
-    {
+    /*private void UnfreezeCamera()
+    { // 
         sphereCamera.LookAt = SphereController.sphere.transform;
         sphereCamera.Follow = SphereController.sphere.transform;
-    }
+    }*/
 
     private void CreateLosePoint()
     {

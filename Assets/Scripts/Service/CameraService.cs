@@ -11,6 +11,10 @@ public class CameraService
     private float currentHue = 0;
     private float RGBChangeInterval = 0.01f;
 
+    private CameraService()
+    {
+    }
+
     public static CameraService instance
     {
         get

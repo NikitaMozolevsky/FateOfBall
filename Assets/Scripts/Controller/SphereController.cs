@@ -13,23 +13,16 @@ public class SphereController : MonoBehaviour
     public static Action onBallCollision;
 
     private SphereService sphereService = SphereService.instance;
-
-    public bool isLeft = true;
-    public float sphereSpeed = 5f;
+    
     public GameObject platform;
+    public Transform followSphere;
         
     private Rigidbody sphereRigitbody;
+    private bool isFirstCollision = true;
+    private Collision firstCollision;
 
-    public float SphereSpeed
+    private SphereController()
     {
-        get { return sphereSpeed; }
-        set { sphereSpeed = value; }
-    }
-
-    public bool IsLeft
-    {
-        get { return isLeft; }
-        set { isLeft = value; }
     }
 
     private void Awake()
@@ -74,6 +67,8 @@ public class SphereController : MonoBehaviour
     { // Столкновение шара с платформой
         Debug.Log("Collision!");
         onBallCollision?.Invoke();
+        /*PlatformService.instance.PassedPlatformManager(collision);*/
+        PlatformService.instance.CheckMissedPlatformCollisionGPT(collision, PlatformController.instance.platformList);
     }
 
     public bool SphereOutOfPlatform()

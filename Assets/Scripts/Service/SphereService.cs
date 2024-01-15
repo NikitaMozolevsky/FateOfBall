@@ -5,9 +5,14 @@ using UnityEngine;
 public class SphereService
 {
     private static SphereService thisInstance;
-    // Статический метод для получения экземпляра синглтона
-
-    private float bottomBorderDistance;
+    
+    private bool isLeft = true;
+    private bool obtained = false;
+    
+    private const float SPHERE_SPEED = 0.2f;
+    // Длинна луча который нужне для проверки что есть припятствие для шара
+    // Сам радиус шара = 0.5.
+    private const float RAY_LENGTH_TO_DETECT_COLLISION = 0.5f;
     public static SphereService instance
     {
         get
@@ -23,27 +28,53 @@ public class SphereService
     public void MoveSphereWithTransform(GameObject sphere, GameObject platform)
     {
         Vector3 targetDirection;
-    
-        if (SphereController.instance.IsLeft)
+        // Проверка наличия препятствия перед шаром
+        CheckObtain(sphere, sphere.transform.forward);
+        CheckObtain(sphere, sphere.transform.right);
+
+        if (!obtained)
         {
-            targetDirection = platform.transform.forward;
-            sphere.transform.position += targetDirection * SphereController.instance.SphereSpeed;
-        }
-        else
-        {
-            targetDirection = platform.transform.right;
-            sphere.transform.position += targetDirection * SphereController.instance.SphereSpeed;
+            if (isLeft)
+            { // Движение по Z
+                targetDirection = platform.transform.forward;
+                sphere.transform.position += targetDirection * SPHERE_SPEED;
+                sphere.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+                sphere.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePositionX;
+            }
+            else
+            { // Движение по X
+                targetDirection = platform.transform.right;
+                sphere.transform.position += targetDirection * SPHERE_SPEED;
+                sphere.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+                sphere.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePositionZ;
+            }
         }
     }
     
     public void ToggleBoolean()
     { // Изменение направления
-        SphereController.instance.IsLeft = !SphereController.instance.IsLeft;
-        Debug.Log("isTouched: " + SphereController.instance.IsLeft);
+        isLeft = !isLeft;
+        Debug.Log("isTouched: " + isLeft);
     }
 
     public bool SphereOutOfPlatform(GameObject sphere, GameObject platform)
     {
-        return sphere.transform.position.y < platform.transform.position.y - bottomBorderDistance;
+        return sphere.transform.position.y < platform.transform.position.y/* - bottomBorderDistance*/;
+    }
+    
+    public void CheckObtain(GameObject sphere, Vector3 direction)
+    {
+        // Определение точки начала луча (от центра шара)
+        Vector3 rayStart = sphere.transform.position;
+
+        // Пуск луча в указанном направлении
+        Ray ray = new Ray(rayStart, direction);
+
+        // Проверка столкновения луча с объектами
+        if (Physics.Raycast(ray, RAY_LENGTH_TO_DETECT_COLLISION))
+        {
+            // Обнаружено препятствие
+            obtained = true;
+        }
     }
 }
