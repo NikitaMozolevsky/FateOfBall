@@ -18,8 +18,9 @@ public class PlatformGenerationService
     private int sameTurnCounter = 0;
     
     public const int PLATFORM_COUNT = 1000;
-    public const int TOP_Y_PLATFORM_POSITION = 0;
-    public const int BOTTOM_Y_PLATFORM_POSITION = -45;
+    public const int SAME_TURNS_COUNT = 5;
+    public const int MIN_PLATFORM_COUNT = 6;
+    
     
     private PlatformGenerationService()
     {
@@ -63,9 +64,9 @@ public class PlatformGenerationService
         return newPlatform;
     }
 
-    public void PlatformGeneratorV3(List<GameObject> platformList)
+    public void PlatformGenerator(List<GameObject> platformList)
     {
-        if (platformList.Count < 10)
+        if (platformList.Count < MIN_PLATFORM_COUNT)
         {
             GenerateAndRaisePlatform(platformList);
         }
@@ -99,7 +100,7 @@ public class PlatformGenerationService
         if (randomSide == previousTurn)
         {
             sameTurnCounter++;
-            if (sameTurnCounter == 5)
+            if (sameTurnCounter == SAME_TURNS_COUNT)
             {
                 randomSide = !randomSide;
             }
@@ -111,36 +112,6 @@ public class PlatformGenerationService
         previousTurn = randomSide;
 
         return randomSide;
-    }
-
-    public void MoveSpawnPoint(bool rightTurn)
-    {
-        // Позиция точки спавна по вертикали зависит от bool переменной.
-        /*float verticalValue = topPosition ? TOP_Y_PLATFORM_POSITION : BOTTOM_Y_PLATFORM_POSITION;*/
-        // Смещение точки создания новой платформы зависит от текущего масштаба платформы.
-        float spawnPointOffset = PlatformController.instance.originalPlatform.transform.localScale.x;
-
-        Transform currentPosition = PlatformController.instance.currentGenerationPoint;
-
-        if (rightTurn) // true - вправо, else - влево.
-        {
-            // Увеличение x координаты на 2
-            currentPosition.position += new Vector3(spawnPointOffset, 0f, 0f);
-        }
-        else
-        {
-            // Увеличение z координаты на 2
-            currentPosition.position += new Vector3(0f, 0f, spawnPointOffset);
-        }
-
-        // Установка Y на уровне отрицательного Y_DIFFERENCE
-        currentPosition.localPosition = new Vector3
-        (currentPosition.localPosition.x, 
-            -PlatformMovementService.Y_DIFFERENCE, 
-            currentPosition.localPosition.z);
-
-        // Перемещение точки спавна новой платформы
-        PlatformController.instance.currentGenerationPoint.position = currentPosition.position;
     }
     
     public Vector3 GetPlatformSpawnPoint(bool rightTurn)

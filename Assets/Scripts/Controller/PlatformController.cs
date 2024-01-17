@@ -90,11 +90,6 @@ public class PlatformController : MonoBehaviour
         // pgs.GenerateAndRaisePlatform(platformList); 
     }
 
-    private void PlatformGeneratorV3()
-    {
-        pgs.PlatformGeneratorV3(platformList);
-    }
-
     // После того как первые 100 платформ сгенерировались моментально опускает первые платформы
     // что бы потом подняить.
     private void RaisingFirstPlatforms()
@@ -128,7 +123,7 @@ public class PlatformController : MonoBehaviour
     {
         if (platformGeneration)
         {
-            pgs.PlatformGeneratorV3(platformList);
+            pgs.PlatformGenerator(platformList);
         }
     }
 
@@ -147,11 +142,6 @@ public class PlatformController : MonoBehaviour
     private void RemoveFirstPlatform()
     {
         prs.RemovePlatformManually(firstPlatform);
-    }
-
-    public void GenerateByTransformPointCollision()
-    { // Генерация алтформы когда в дочерний sphereCollider попадает точка transform платформы 
-        
     }
 
     private void GenerateAndRaisePlatform()
