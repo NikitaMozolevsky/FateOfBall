@@ -37,13 +37,13 @@ public class CameraService
 
             while (t < 1f && CameraController.colorChangerActive)
             {
-                t += Time.deltaTime / cameraController.transitionDuration;
+                t += Time.deltaTime / CameraController.COLOR_TRANSITION_DURATION;
                 Camera.main.backgroundColor = Color.Lerp(startColor, targetColor, t);
                 yield return null;
             }
 
             // Ждем перед следующим цветом
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(CameraController.DELAY_BEFORE_STARTING_COLOR_CHANGE);
         }
     }
 }

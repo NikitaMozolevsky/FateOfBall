@@ -11,15 +11,21 @@ using UnityEngine;
 public class PlatformController : MonoBehaviour
 {
     public static PlatformController instance { get; private set; }
+    private PlatformRemoveService prs = PlatformRemoveService.instance;
+    private PlatformMovementService pms = PlatformMovementService.instance;
+    private PlatformGenerationService pgs = PlatformGenerationService.instance;
+    
     private PlatformService platformService = PlatformService.instance;
     public List<GameObject> platformList = new(); // Очередь из платформ
     // Вызывается при запуске игры и рестарте (по задумке)
     public static Action onNewGame;
+    public static Action onDropPlatform;
 
     public GameObject viewPanel;
     [NonSerialized] public GameObject firstPlatform;
     public Transform platformsTransform;
-    public AnimationCurve raisingCurve;
+    public AnimationCurve raiseCurve;
+    public AnimationCurve dropCurve;
 
     // Точка спавна новой платформы, постоянно перемещается.
     // Будет -2 по z т.к. должна переместится на новую точку.
@@ -31,6 +37,7 @@ public class PlatformController : MonoBehaviour
     // Позиции пеервых 2 платформ, ктороые всегда на одном месте
     private Vector3 firstPlatformVector;
     private Vector3 secondPlatformVector;
+    private int platformCounter = 0;
 
     private PlatformController()
     {
@@ -46,15 +53,14 @@ public class PlatformController : MonoBehaviour
     {
         onNewGame += PreparePlatformGenerator;
         ActionPlayButton.onPlay += RemoveFirstPlatform;
-        // Уничтожение невидимых платформ (с багом)
-        //GameController.onLose += DestroyInvisiblePlatforms;
+        onDropPlatform += GenerateAndRaisePlatform;
     }
 
     private void OnDisable()
     {
         onNewGame -= PreparePlatformGenerator;
         ActionPlayButton.onPlay -= RemoveFirstPlatform;
-        //GameController.onLose -= DestroyInvisiblePlatforms;
+        onDropPlatform -= GenerateAndRaisePlatform;
     }
 
     private void CreateSingleton()
@@ -71,46 +77,68 @@ public class PlatformController : MonoBehaviour
     private void Update()
     {
         // Постоянное управление поднятием о опусканием платформы.
-        PlatformListManager();
+        PlatformsManager();
+        
     }
 
     // Срабатывает при рестарте и запуске игры.
     public void PreparePlatformGenerator()
     {
-        platformService.DeleteAllPlatforms(platformList); // Очищение перед запуском
+        // Нужно переместить в другой метод, вызывающийся после уничтожения платформ.
+        prs.DeleteAllPlatforms(platformList); // Очищение перед запуском
+        
+        // pgs.GenerateAndRaisePlatform(platformList); 
+    }
+
+    private void PlatformGeneratorV3()
+    {
+        pgs.PlatformGeneratorV3(platformList);
     }
 
     // После того как первые 100 платформ сгенерировались моментально опускает первые платформы
     // что бы потом подняить.
     private void RaisingFirstPlatforms()
     {
-        PlatformService.instance.PutDownFirstPlatforms(platformList);
-        StartCoroutine(PlatformService.instance.RaiseFirstPlatforms(platformList));
+        pms.PutDownFirstPlatforms(platformList);
+        StartCoroutine(pms.RaiseFirstPlatforms(platformList));
     }
     
     // Генерирует в Update платформы
-    public void PlatformListManager()
+    public void PlatformsManagerV1()
     {
         if (platformGeneration)
         {
-            platformService.PlatformGenerator(platformList);
+            pgs.PlatformGeneratorV1(platformList);
         }
 
         if (!smoothlyPlatformsRaised)
         { // Срабатывает когда уже созданы SMOOTHLY_RAISED_PLATFORMS платформ
             // И эти платформы еще не были подняты, далее bool меняется что бы
             // Платформы не были подняты повторно
-            if (platformList.Count > PlatformService.SMOOTHLY_RAISED_PLATFORMS)
+            if (platformList.Count > PlatformMovementService.SMOOTHLY_RAISED_PLATFORMS)
             {
                 RaisingFirstPlatforms();
                 smoothlyPlatformsRaised = true;
             }
         }
     }
+    
+    // Генерирует в Update платформы
+    public void PlatformsManager()
+    {
+        if (platformGeneration)
+        {
+            pgs.PlatformGeneratorV3(platformList);
+        }
+    }
 
     public GameObject CreatePlatformObject(Vector3 spawnPosition)
     {
+        // Для нумерации платформ
+        platformCounter++;
+        string platformName = "Platform_" + platformCounter.ToString();
         GameObject newPlatform = Instantiate(originalPlatform, spawnPosition, Quaternion.identity);
+        newPlatform.name = platformName;
         // PUT объекта в platforms empty object.
         newPlatform.transform.parent = platformsTransform;
         return newPlatform;
@@ -118,21 +146,16 @@ public class PlatformController : MonoBehaviour
 
     private void RemoveFirstPlatform()
     {
-        platformService.RemovePlatformManually(firstPlatform);
-    }
-
-    private void DestroyInvisiblePlatforms()
-    {
-        viewPanel.SetActive(true);
-        foreach (var platform in platformList)
-        {
-            platformService.DestroyPlatformIfInvisible(platform, viewPanel);
-        }
-        viewPanel.SetActive(false);
+        prs.RemovePlatformManually(firstPlatform);
     }
 
     public void GenerateByTransformPointCollision()
     { // Генерация алтформы когда в дочерний sphereCollider попадает точка transform платформы 
         
+    }
+
+    private void GenerateAndRaisePlatform()
+    {
+        pgs.GenerateAndRaisePlatform(platformList);
     }
 } 

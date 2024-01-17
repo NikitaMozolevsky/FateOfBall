@@ -900,9 +900,6 @@ MonoBehaviour:
   - {r: 0.2, g: 0.6, b: 0.2, a: 0}
   - {r: 0.6, g: 0.6, b: 0.2, a: 0}
   losePoint: {fileID: 1980237831}
-  transitionDuration: 5
-  highPriority: 11
-  lowPriority: 9
 --- !u!1 &345764469
 GameObject:
   m_ObjectHideFlags: 0
@@ -1871,7 +1868,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 856884039}
-  m_LocalRotation: {x: 0.30273283, y: 0.23484084, z: -0.077237956, w: 0.9204548}
+  m_LocalRotation: {x: 0.3027328, y: 0.23484084, z: -0.07723796, w: 0.9204548}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -3349,6 +3346,12 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1719023281 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3331361846125873790, guid: 9344d6a627f337b47be6419b05775815,
+    type: 3}
+  m_PrefabInstance: {fileID: 2758165544408669567}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1756663542 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3881803569449074737, guid: c1872e40cfb52c14abf06658b946035c,
@@ -3376,7 +3379,7 @@ MonoBehaviour:
   platformList: []
   viewPanel: {fileID: 1560478665}
   platformsTransform: {fileID: 1756663543}
-  raisingCurve:
+  raiseCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
@@ -3393,6 +3396,30 @@ MonoBehaviour:
       value: 1
       inSlope: 0
       outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  dropCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 2
+      outSlope: 2
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
@@ -4062,6 +4089,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2192783317394340639, guid: 9344d6a627f337b47be6419b05775815,
         type: 3}
+      propertyPath: sphere
+      value: 
+      objectReference: {fileID: 1719023281}
+    - target: {fileID: 2192783317394340639, guid: 9344d6a627f337b47be6419b05775815,
+        type: 3}
       propertyPath: platform
       value: 
       objectReference: {fileID: 1756663542}
@@ -4089,6 +4121,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_RootOrder
       value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8653591081565663699, guid: 9344d6a627f337b47be6419b05775815,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8653591081565663699, guid: 9344d6a627f337b47be6419b05775815,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8653591081565663699, guid: 9344d6a627f337b47be6419b05775815,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8653591081565663699, guid: 9344d6a627f337b47be6419b05775815,
         type: 3}

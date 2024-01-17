@@ -15,9 +15,12 @@ public class CameraController : MonoBehaviour
     public Color[] colors;
     public Transform losePoint;
     
-    public float transitionDuration = 5f;
-    public int highPriority = 11;
-    public int lowPriority = 9;
+    // Время за которое которое меняется цвет.
+    public const float COLOR_TRANSITION_DURATION = 5f;
+    public const float DELAY_BEFORE_STARTING_COLOR_CHANGE = 1f;
+    public const float DURATION_CAMERA_CHANGE = 2f;
+    public const int HIGH_PRIORITY = 11;
+    public const int LOW_PRIORITY = 9;
 
     // Первое ли это касание
     private bool firstTouch = true;
@@ -76,18 +79,18 @@ public class CameraController : MonoBehaviour
     { // Смена еамеры на привязанную к шару если это первое касание
         if (firstTouch)
         {
-            sphereCamera.LookAt = SphereController.sphere.transform;
-            sphereCamera.Follow = SphereController.sphere.transform;
-            sphereCamera.m_Priority = highPriority;
-            startPositionCamera.m_Priority = lowPriority;
+            sphereCamera.LookAt = SphereController.instance.sphere.transform;
+            sphereCamera.Follow = SphereController.instance.sphere.transform;
+            sphereCamera.m_Priority = HIGH_PRIORITY;
+            startPositionCamera.m_Priority = LOW_PRIORITY;
             firstTouch = false;
         }
     }
 
     private void SetPriorityToStartPointCamera()
     { // Смена еамеры на привязанную к точке начала
-        sphereCamera.m_Priority = lowPriority;
-        startPositionCamera.m_Priority = highPriority;
+        sphereCamera.m_Priority = LOW_PRIORITY;
+        startPositionCamera.m_Priority = HIGH_PRIORITY;
     }
 
     private void StartColorChanger()
@@ -119,6 +122,6 @@ public class CameraController : MonoBehaviour
 
     private void CreateLosePoint()
     {
-        losePoint.position = SphereController.sphere.transform.position;
+        losePoint.position = SphereController.instance.sphere.transform.position;
     }
 }

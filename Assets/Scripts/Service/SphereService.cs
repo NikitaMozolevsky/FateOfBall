@@ -32,21 +32,21 @@ public class SphereService
         CheckObtain(sphere, sphere.transform.forward);
         CheckObtain(sphere, sphere.transform.right);
 
-        if (!obtained)
+        if (!obtained) // Если препятствия нет - продолжается работа скрипта поворота.
         {
             if (isLeft)
             { // Движение по Z
-                targetDirection = platform.transform.forward;
+                targetDirection = sphere.transform.forward;
                 sphere.transform.position += targetDirection * SPHERE_SPEED;
-                sphere.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
-                sphere.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePositionX;
+                /*sphere.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+                sphere.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePositionX;*/
             }
             else
             { // Движение по X
-                targetDirection = platform.transform.right;
+                targetDirection = sphere.transform.right;
                 sphere.transform.position += targetDirection * SPHERE_SPEED;
-                sphere.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
-                sphere.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePositionZ;
+                /*sphere.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+                sphere.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePositionZ;*/
             }
         }
     }
@@ -71,7 +71,7 @@ public class SphereService
         Ray ray = new Ray(rayStart, direction);
 
         // Проверка столкновения луча с объектами
-        if (Physics.Raycast(ray, RAY_LENGTH_TO_DETECT_COLLISION))
+        if (Physics.Raycast(ray, sphere.transform.localScale.x / 2))
         {
             // Обнаружено препятствие
             obtained = true;

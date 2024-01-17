@@ -9,11 +9,13 @@ public class SphereController : MonoBehaviour
 {
     // Единственный экземпляр синглтона
     public static SphereController instance { get; private set; }
-    public static GameObject sphere;
+    private SphereService sphereService = SphereService.instance;
+    private PlatformRemoveService prs = PlatformRemoveService.instance;
+    private PlatformGenerationService pgs = PlatformGenerationService.instance;
+    
+    public GameObject sphere;
     public static Action onBallCollision;
 
-    private SphereService sphereService = SphereService.instance;
-    
     public GameObject platform;
     public Transform followSphere;
         
@@ -28,7 +30,6 @@ public class SphereController : MonoBehaviour
     private void Awake()
     {
         CreateSingleton();
-        sphere = gameObject;
         sphereRigitbody = sphere.GetComponent<Rigidbody>();
     }
 
@@ -62,13 +63,13 @@ public class SphereController : MonoBehaviour
             Debug.LogWarning("Rigidbody or platform is null");
         }
     }
-    
+
     private void OnCollisionEnter(Collision collision)
-    { // Столкновение шара с платформой
+    {
+        // Столкновение шара с платформой
         Debug.Log("Collision!");
         onBallCollision?.Invoke();
-        /*PlatformService.instance.PassedPlatformManager(collision);*/
-        PlatformService.instance.CheckMissedPlatformCollisionGPT(collision, PlatformController.instance.platformList);
+        prs.CheckMissedPlatformCollisionGPT(collision, PlatformController.instance.platformList);
     }
 
     public bool SphereOutOfPlatform()
