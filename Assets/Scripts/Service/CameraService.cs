@@ -30,20 +30,23 @@ public class CameraService
 
     public IEnumerator ColorChanger()
     {
-        foreach (Color targetColor in cameraController.colors)
+        while (!GameController.loseCondition)
         {
-            float t = 0f;
-            Color startColor = Camera.main.backgroundColor;
-
-            while (t < 1f && CameraController.colorChangerActive)
+            foreach (Color targetColor in cameraController.colors)
             {
-                t += Time.deltaTime / CameraController.COLOR_TRANSITION_DURATION;
-                Camera.main.backgroundColor = Color.Lerp(startColor, targetColor, t);
-                yield return null;
-            }
+                float t = 0f;
+                Color startColor = Camera.main.backgroundColor;
 
-            // Ждем перед следующим цветом
-            yield return new WaitForSeconds(CameraController.DELAY_BEFORE_STARTING_COLOR_CHANGE);
+                while (t < 1f && CameraController.colorChangerActive)
+                {
+                    t += Time.deltaTime / CameraController.COLOR_TRANSITION_DURATION;
+                    Camera.main.backgroundColor = Color.Lerp(startColor, targetColor, t);
+                    yield return null;
+                }
+
+                // Ждем перед следующим цветом
+                yield return new WaitForSeconds(CameraController.DELAY_BEFORE_STARTING_COLOR_CHANGE);
+            }
         }
     }
 }

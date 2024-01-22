@@ -19,7 +19,7 @@ public class PlatformGenerationService
     
     public const int PLATFORM_COUNT = 1000;
     public const int SAME_TURNS_COUNT = 5;
-    public const int MIN_PLATFORM_COUNT = 6;
+    public const int MIN_PLATFORM_COUNT = 9;
     
     
     private PlatformGenerationService()
