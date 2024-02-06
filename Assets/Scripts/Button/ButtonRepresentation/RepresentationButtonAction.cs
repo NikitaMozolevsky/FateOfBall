@@ -4,26 +4,29 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class RepresentationButtonAction : MonoBehaviour
+public class RepresentationButtonAction
 {
-    public static RepresentationButtonAction instance { get; private set; }
+    private static RepresentationButtonAction _instance;
+
+    // Время за которое кнопка проячется и показывается.
+    public const float DURATION_OF_BUTTON_MOVEMENT = 1f;
     
-    public float desiredDuration;
-    
-    private void Awake()
+    private RepresentationButtonAction()
     {
-        CreateSingleton();
     }
-    
-    private void CreateSingleton() // Создание экземпляра
+
+    // Статический метод для получения экземпляра синглтона
+    public static RepresentationButtonAction instance
     {
-        if (instance == null)
+        get
         {
-            instance = this;
-            DontDestroyOnLoad(gameObject);
-            return;
+            if (_instance == null)
+            {
+                
+                _instance = new RepresentationButtonAction();
+            }
+            return _instance;
         }
-        Destroy(gameObject);
     }
 
     public IEnumerator ChangeButtonPosition
@@ -33,10 +36,10 @@ public class RepresentationButtonAction : MonoBehaviour
         RectTransform buttonRectTransform = button.GetComponent<RectTransform>();
         Vector2 startPosition = buttonRectTransform.anchoredPosition;
 
-        while (elapsed < desiredDuration)
+        while (elapsed < DURATION_OF_BUTTON_MOVEMENT)
         {
             elapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsed / desiredDuration);
+            float t = Mathf.Clamp01(elapsed / DURATION_OF_BUTTON_MOVEMENT);
             float curveT = curve.Evaluate(t);
 
             buttonRectTransform.anchoredPosition = Vector2.Lerp
@@ -47,6 +50,7 @@ public class RepresentationButtonAction : MonoBehaviour
         buttonRectTransform.anchoredPosition = targetPosition;
     }
     
+    // Метод включения и отключения кнопки.
     public void ButtonRendering(GameObject button, bool showButton)
     {
         button.GetComponent<Image>().enabled = showButton;
@@ -54,4 +58,22 @@ public class RepresentationButtonAction : MonoBehaviour
         button.transform.GetChild(0).gameObject.SetActive(showButton);
     }
 
+    // Временное отключение действия кнопки. Дабы не мешала игре.
+    public IEnumerator TemporarilyDeactivateButton(GameObject button)
+    {
+        // Получаем RectTransform для объектов
+        RectTransform buttonRect = button.GetComponent<RectTransform>();
+
+        // Запоминаем исходные позиции
+        int originalButtonIndex = buttonRect.GetSiblingIndex();
+
+        // Перемещаем кнопку вниз
+        buttonRect.SetAsFirstSibling();
+
+        // Ждем заданное время
+        yield return new WaitForSeconds(DURATION_OF_BUTTON_MOVEMENT);
+
+        // Возвращаем кнопку на исходное место
+        buttonRect.SetSiblingIndex(originalButtonIndex);
+    }
 }

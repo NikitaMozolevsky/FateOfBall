@@ -1,30 +1,17 @@
 ﻿
 
 using System;
-using UnityEditor;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class GameController : MonoBehaviour
 {
     
     public static GameController instance { get; private set; }
-    public static Action onLose; // Выход за пределы.
-    // Становится true при нажатии play.
-    public static bool playCondition = false;
-    public static bool loseCondition = false;
-    public static bool menuCondition = true;
-    public static bool pauseCondition = false;
-
-    private int stopTime = 0;
-    private int continueTime = 1;
+    private GameService gameService = GameService.instance;
 
     private GameController()
     {
-    }
-
-    private void Awake()
-    {
-        CreateSingleton();
     }
     
     private void CreateSingleton()
@@ -37,64 +24,51 @@ public class GameController : MonoBehaviour
         }
         Destroy(gameObject);
     }
-
+    
     private void OnEnable()
     {
-        ActionPauseButton.onPauseGame += PauseOn;
-        ActionContinueButton.onContinueGame += PauseOff;
-        ActionPlayButton.onPlay += ResetOnPlayBoolVariables;
-        ActionRestartButton.onRestartGame += ResetOnRestartBoolVariables;
-        onLose -= ResetOnLoseBoolVariables;
-        
+        ActionPauseButton.onPauseGame += gameService.StopTime;
+        ActionContinueButton.onContinueGame += gameService.ContinueTime;
+        ActionPlayButton.onPlay += gameService.ResetOnPlayVariables;
+        ActionRestartButton.onRestartGame += gameService.ResetOnRestartVariables;
+        ActionRestartButton.onRestartGame += InvokeAfterRestartInvention;
+        GameService.onLose += gameService.ResetOnLoseVariables;
+        GameService.afterRestartGame += gameService.ResetAfterRestartVariablesCoroutine;
     }
 
     private void OnDisable()
     {
-        ActionPauseButton.onPauseGame -= PauseOn;
-        ActionContinueButton.onContinueGame -= PauseOff;
-        ActionPlayButton.onPlay += ResetOnPlayBoolVariables;
-        ActionRestartButton.onRestartGame += ResetOnRestartBoolVariables;
-        onLose -= ResetOnLoseBoolVariables;
-        
+        ActionPauseButton.onPauseGame -= gameService.StopTime;
+        ActionContinueButton.onContinueGame -= gameService.ContinueTime;
+        ActionPlayButton.onPlay -= gameService.ResetOnPlayVariables;
+        ActionRestartButton.onRestartGame -= gameService.ResetOnRestartVariables;
+        ActionRestartButton.onRestartGame -= InvokeAfterRestartInvention;
+        GameService.onLose -= gameService.ResetOnLoseVariables;
+        GameService.afterRestartGame -= gameService.ResetAfterRestartVariablesCoroutine;
     }
-    
+
+    private void Awake()
+    {
+        CreateSingleton();
+    }
+
+    private void Start()
+    {
+        StartGame();
+    }
+
     private void Update()
     {
-        OnLose();
+        gameService.CheckLose();
     }
 
-    private void PauseOn()
+    private void StartGame()
     {
-        Time.timeScale = stopTime;
+        gameService.StartGame();
     }
 
-    private void PauseOff()
+    private void InvokeAfterRestartInvention()
     {
-        Time.timeScale = continueTime;
-    }
-    
-    private void OnLose()
-    {
-        if (SphereController.instance.SphereOutOfPlatform() && !loseCondition)
-        {
-            onLose?.Invoke();
-            loseCondition = true;
-            Debug.Log("Lose!");
-        }
-    }
-
-    private void ResetOnPlayBoolVariables()
-    { // Устанавливает bool переменным соответствующие значения
-        playCondition = true;
-    }
-
-    private void ResetOnRestartBoolVariables()
-    { // Устанавливает bool переменным соответствующие значения
-        
-    }
-    
-    private void ResetOnLoseBoolVariables()
-    { // Устанавливает bool переменным соответствующие значения
-        
+        StartCoroutine(gameService.InvokeAfterRestartInvention());
     }
 }

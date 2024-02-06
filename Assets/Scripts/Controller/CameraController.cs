@@ -7,23 +7,18 @@ using UnityEngine;
 public class CameraController : MonoBehaviour
 {
     public static CameraController instance { get; private set; }
-    public static bool colorChangerActive = false;
-    
-    public CinemachineFreeLook sphereCamera; // Привязанная к шару
-    public CinemachineFreeLook startPositionCamera; // Привязанная к точке возрождения
-    //public CinemachineFreeLook loseCamera; // Привязанная к месту проигрыша
-    public Color[] colors;
-    public Transform losePoint;
-    
-    // Время за которое которое меняется цвет.
-    public const float COLOR_TRANSITION_DURATION = 5f;
-    public const float DELAY_BEFORE_STARTING_COLOR_CHANGE = 1f;
-    public const float DURATION_CAMERA_CHANGE = 2f;
-    public const int HIGH_PRIORITY = 11;
-    public const int LOW_PRIORITY = 9;
+    private CameraService cameraService = CameraService.instance;
 
-    // Первое ли это касание
-    private bool firstTouch = true;
+    // Камера привязана к шару.
+    public CinemachineFreeLook sphereCamera;
+    // Камера привязана к точке на которой приземляется шар при первом касании.
+    public CinemachineFreeLook startMundanePositionCamera;
+    // Начальная позиция камеры следящей за шаром.
+    // Нужна для возвращения камеры в начальное положение.
+    public Transform startSphereCameraTransform;
+    
+    // Массив цветов которые меняются.
+    public Color[] colors;
 
     private CameraController()
     {
@@ -40,88 +35,89 @@ public class CameraController : MonoBehaviour
         Destroy(gameObject);
     }
     
-    private void Start()
-    {
-        CreateSingleton();
-        StartColorChanger();
-    }
-
+    // Подписка на события.
     private void OnEnable()
     {
-        SphereController.onBallCollision += SetPriorityToSphereCamera;
-        //ActionPlayButton.onPlay += ColorChanger;
-        ActionRestartButton.onRestartGame += SetPriorityToStartPointCamera;
+        SphereController.onFirstBallCollision += UpPriorityToSphereCamera;
         ActionPlayButton.onPlay += ContinueColorChanger;
         ActionPauseButton.onPauseGame += PauseColorChanger;
         ActionContinueButton.onContinueGame += ContinueColorChanger;
-        GameController.onLose += PauseColorChanger;
-        GameController.onLose += CreateLosePoint;
-        GameController.onLose += FreezeCamera;
-        //SphereController.onBallCollision += UnfreezeCamera;
+        GameService.onLose += PauseColorChanger;
+        GameService.onLose += FreezeSphereCamera;
+        ActionRestartButton.onRestartGame += UpPriorityToMundanePointCamera;
+        // GameService.afterRestartGame += cameraService.FollowSphereCamera;
+        SphereController.onFirstBallCollision += cameraService.FollowSphereCamera;
+        GameService.afterRestartGame += SetSphereCameraStartPosition;
     }
 
+    // Отписка от событий.
     private void OnDisable()
     {
-        SphereController.onBallCollision -= SetPriorityToSphereCamera;
-        //ActionPlayButton.onPlay -= ColorChanger; // (StartColorChanger)
-        ActionRestartButton.onRestartGame -= SetPriorityToStartPointCamera;
+        SphereController.onFirstBallCollision -= UpPriorityToSphereCamera;
         ActionPlayButton.onPlay -= ContinueColorChanger;
         ActionPauseButton.onPauseGame -= PauseColorChanger;
         ActionContinueButton.onContinueGame -= ContinueColorChanger;
-        GameController.onLose -= PauseColorChanger;
-        GameController.onLose -= CreateLosePoint;
-        GameController.onLose -= FreezeCamera;
-        //SphereController.onBallCollision -= UnfreezeCamera;
-        
+        GameService.onLose -= PauseColorChanger;
+        GameService.onLose -= FreezeSphereCamera;
+        ActionRestartButton.onRestartGame -= UpPriorityToMundanePointCamera;
+        // GameService.afterRestartGame -= cameraService.FollowSphereCamera;
+        SphereController.onFirstBallCollision -= cameraService.FollowSphereCamera;
+        GameService.afterRestartGame -= SetSphereCameraStartPosition;
     }
 
-    private void SetPriorityToSphereCamera()
-    { // Смена еамеры на привязанную к шару если это первое касание
-        if (firstTouch)
-        {
-            sphereCamera.LookAt = SphereController.instance.sphere.transform;
-            sphereCamera.Follow = SphereController.instance.sphere.transform;
-            sphereCamera.m_Priority = HIGH_PRIORITY;
-            startPositionCamera.m_Priority = LOW_PRIORITY;
-            firstTouch = false;
-        }
+    private void Awake()
+    {
+        CreateSingleton();
     }
 
-    private void SetPriorityToStartPointCamera()
-    { // Смена еамеры на привязанную к точке начала
-        sphereCamera.m_Priority = LOW_PRIORITY;
-        startPositionCamera.m_Priority = HIGH_PRIORITY;
+    private void Start()
+    {
+        StartColorChanger();
     }
 
+    // Устанавливает повышенный приоритет для камеры следящей за сферой.
+    // Срабатывает при первом касании.
+    private void UpPriorityToSphereCamera()
+    {
+        cameraService.UpPriorityToSphereCamera(sphereCamera, startMundanePositionCamera);
+    }
+
+    // Устанавливает повышенный приоритет для камеры следящей за точкой приземления шара.
+    // Работает изначально, срабатывает при рестарте.
+    private void UpPriorityToMundanePointCamera()
+    { 
+        cameraService.UpPriorityToMundanePointCamera(sphereCamera, startMundanePositionCamera);
+    }
+
+    // Запускает куратину смены цвета фона.
     private void StartColorChanger()
     {
         StartCoroutine(CameraService.instance.ColorChanger());
     }
 
+    // Останавливает смену цвета.
     private void PauseColorChanger()
     {
-        colorChangerActive = false;
+        cameraService.PauseColorChanger();
     }
 
+    // Продолжнает смену цвета.
     private void ContinueColorChanger()
     {
-        colorChangerActive = true;
+        cameraService.ContinueColorChanger();
     }
 
-    private void FreezeCamera()
-    { // Замораживает камеру во время поражения на losePoint
-        sphereCamera.LookAt = losePoint;
-        sphereCamera.Follow = losePoint;
-    }
-
-    /*private void UnfreezeCamera()
-    { // 
-        sphereCamera.LookAt = SphereController.sphere.transform;
-        sphereCamera.Follow = SphereController.sphere.transform;
-    }*/
-
-    private void CreateLosePoint()
+    // Замораживает камеру сферы.
+    // Срабатывает во время поражения.
+    private void FreezeSphereCamera()
     {
-        losePoint.position = SphereController.instance.sphere.transform.position;
+        cameraService.OffSphereCamera(sphereCamera);
+    }
+
+    // Вызывается после рестарта.
+    // Камера следящая за сферой возвращается в изначальное положение.
+    private void SetSphereCameraStartPosition()
+    {
+        cameraService.SetSphereCameraStartPosition(sphereCamera, startSphereCameraTransform);
     }
 }

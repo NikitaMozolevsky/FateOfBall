@@ -7,6 +7,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class PlatformController : MonoBehaviour
 {
@@ -14,138 +15,141 @@ public class PlatformController : MonoBehaviour
     private PlatformRemoveService prs = PlatformRemoveService.instance;
     private PlatformMovementService pms = PlatformMovementService.instance;
     private PlatformGenerationService pgs = PlatformGenerationService.instance;
-    
-    private PlatformService platformService = PlatformService.instance;
-    public List<GameObject> platformList = new(); // Очередь из платформ
-    // Вызывается при запуске игры и рестарте (по задумке)
-    public static Action onNewGame;
-    public static Action onDropPlatform;
+    private GameService gameService = GameService.instance;
 
-    public GameObject viewPanel;
+    // Плоатформы которые поднимаются.
+    //public List<GameObject> raisingPlatformList = new(); // Очередь из платформ
+    // Платформы которые подняты.
+    public List<GameObject> raisedPlatformList = new(); // Очередь из платформ
+    // Плоатформы которые сброшены.
+    public List<GameObject> droppedPlatformList = new(); // Очередь из платформ
+    
     [NonSerialized] public GameObject firstPlatform;
-    public Transform platformsTransform;
+    public Transform parentTransform;
     public AnimationCurve raiseCurve;
     public AnimationCurve dropCurve;
 
     // Точка спавна новой платформы, постоянно перемещается.
     // Будет -2 по z т.к. должна переместится на новую точку.
-    public Transform currentGenerationPoint;
-    public GameObject originalPlatform; // Префаб платформы.
-    [NonSerialized] public bool platformGeneration = true;
-    [NonSerialized] public bool smoothlyPlatformsRaised = false;
-    
+    [NonSerialized] public Transform currentPlatformGenerationPoint;
+    // Точка от которой начианется генерация платформ в начале игры.
+    public Transform startPlatformGenerationPoint;
+    // Префаб платформы.
+    public GameObject originalPlatform;
+
     // Позиции пеервых 2 платформ, ктороые всегда на одном месте
     private Vector3 firstPlatformVector;
     private Vector3 secondPlatformVector;
-    private int platformCounter = 0;
 
     private PlatformController()
     {
     } // Для Singleton
-
-    private void Start()
-    {
-        CreateSingleton();
-        onNewGame?.Invoke();
-    }
-
-    private void OnEnable()
-    {
-        onNewGame += PreparePlatformGenerator;
-        ActionPlayButton.onPlay += RemoveFirstPlatform;
-        onDropPlatform += GenerateAndRaisePlatform;
-    }
-
-    private void OnDisable()
-    {
-        onNewGame -= PreparePlatformGenerator;
-        ActionPlayButton.onPlay -= RemoveFirstPlatform;
-        onDropPlatform -= GenerateAndRaisePlatform;
-    }
-
+    
     private void CreateSingleton()
     {
         if (instance == null)
         {
             instance = this;
-            DontDestroyOnLoad(gameObject);
-            return;
         }
-        Destroy(gameObject);
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+    
+    private void OnEnable()
+    {
+        GameService.onStartGame += pgs.CreateCurrentGenerationPoint;
+        ActionPlayButton.onPlay += RemoveFirstPlatform;
+        SphereController.onBallCollision += CollisionWithPlatform;
+        PlatformRemoveService.onDropPlatform += GenerateAndRaisePlatform;
+        GameService.onLose += DropAllRaisedPlatforms;
+        GameService.onLose += AssignAllRaisedPlatfornsAsDropped;
+        GameService.afterRestartGame += ClearDroppedList;
+        GameService.afterRestartGame += pgs.SetGenerationPointToStartPosition;;
+        GameService.afterRestartGame += GenerateFirstPlatforms;
+    }
+
+    private void OnDisable()
+    {
+        GameService.onStartGame -= pgs.CreateCurrentGenerationPoint;
+        ActionPlayButton.onPlay -= RemoveFirstPlatform;
+        SphereController.onBallCollision -= CollisionWithPlatform;
+        PlatformRemoveService.onDropPlatform -= GenerateAndRaisePlatform;
+        GameService.onLose -= DropAllRaisedPlatforms;
+        GameService.onLose -= AssignAllRaisedPlatfornsAsDropped;
+        GameService.afterRestartGame -= ClearDroppedList;
+        GameService.afterRestartGame -= pgs.SetGenerationPointToStartPosition;
+        GameService.afterRestartGame -= GenerateFirstPlatforms;
+    }
+
+    private void Awake()
+    {
+        CreateSingleton();
+    }
+
+    private void Start()
+    {
+        // Генерирует первые платформы, которые поддерживают постоянное кол-во.
+        GenerateFirstPlatforms();
     }
 
     private void Update()
     {
-        // Постоянное управление поднятием о опусканием платформы.
-        PlatformsManager();
-        
-    }
-
-    // Срабатывает при рестарте и запуске игры.
-    public void PreparePlatformGenerator()
-    {
-        // Нужно переместить в другой метод, вызывающийся после уничтожения платформ.
-        prs.DeleteAllPlatforms(platformList); // Очищение перед запуском
-        
-        // pgs.GenerateAndRaisePlatform(platformList); 
-    }
-
-    // После того как первые 100 платформ сгенерировались моментально опускает первые платформы
-    // что бы потом подняить.
-    private void RaisingFirstPlatforms()
-    {
-        pms.PutDownFirstPlatforms(platformList);
-        StartCoroutine(pms.RaiseFirstPlatforms(platformList));
-    }
-    
-    // Генерирует в Update платформы
-    public void PlatformsManagerV1()
-    {
-        if (platformGeneration)
-        {
-            pgs.PlatformGeneratorV1(platformList);
-        }
-
-        if (!smoothlyPlatformsRaised)
-        { // Срабатывает когда уже созданы SMOOTHLY_RAISED_PLATFORMS платформ
-            // И эти платформы еще не были подняты, далее bool меняется что бы
-            // Платформы не были подняты повторно
-            if (platformList.Count > PlatformMovementService.SMOOTHLY_RAISED_PLATFORMS)
-            {
-                RaisingFirstPlatforms();
-                smoothlyPlatformsRaised = true;
-            }
-        }
-    }
-    
-    // Генерирует в Update платформы
-    public void PlatformsManager()
-    {
-        if (platformGeneration)
-        {
-            pgs.PlatformGenerator(platformList);
-        }
+        InvisibleDroppedPlatformDestroyer();
     }
 
     public GameObject CreatePlatformObject(Vector3 spawnPosition)
     {
-        // Для нумерации платформ
-        platformCounter++;
-        string platformName = "Platform_" + platformCounter.ToString();
-        GameObject newPlatform = Instantiate(originalPlatform, spawnPosition, Quaternion.identity);
-        newPlatform.name = platformName;
-        // PUT объекта в platforms empty object.
-        newPlatform.transform.parent = platformsTransform;
-        return newPlatform;
+        return pgs.CreatePlatformObject(spawnPosition, originalPlatform, parentTransform);
     }
 
+    // Убирает первую платформу.
     private void RemoveFirstPlatform()
     {
         prs.RemovePlatformManually(firstPlatform);
     }
 
+    // Метод генерирует и поднимает одну платформу.
     private void GenerateAndRaisePlatform()
     {
-        pgs.GenerateAndRaisePlatform(platformList);
+        pgs.GenerateAndRaisePlatform(raisedPlatformList);
+    }
+
+    // Вызывается при поражении. Роняет все поднятые платформы и которые видны.
+    // Принимает в качестве параметра список с поднимаемыми и поднятыми платформами.
+    // Уроненые платформа уже должны падать.
+    // Роняет с рандомной задержкой используя IEnumerator.
+    private void DropAllRaisedPlatforms()
+    {
+        prs.DropAllRaisedPlatfromsWithRandomDelay(raisedPlatformList);
+    }
+
+    // Вызывается при поражении, после фактического сброса всех платформ.
+    // Перемещает все платформы в список сброшенных для возможности их удаления.
+    private void AssignAllRaisedPlatfornsAsDropped()
+    {
+        prs.AssignAllRaisedPlatfornsAsDropped(raisedPlatformList, droppedPlatformList);
+    }
+
+    private void CollisionWithPlatform(Collision collision)
+    {
+        prs.CollisionWithPlatform(collision, raisedPlatformList, droppedPlatformList);
+    }
+
+    // Генерирует первые платформы, которые поддерживают постоянное кол-во.
+    private void GenerateFirstPlatforms()
+    {
+        StartCoroutine(pgs.GenerateFirstPlatforms(raisedPlatformList));
+    }
+
+    private void InvisibleDroppedPlatformDestroyer()
+    {
+        prs.InvisibleDroppedPlatformDestroyer(droppedPlatformList);
+    }
+
+    private void ClearDroppedList()
+    {
+        prs.ClearDroppedList(droppedPlatformList);
     }
 } 

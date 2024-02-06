@@ -8,22 +8,22 @@ public class ActionTouchPanelButton : MonoBehaviour
 {
     
     private SphereService sphereService = SphereService.instance;
-
+    
     private Button panelButton;
 
     private void OnEnable()
     { // Подписка и отписка от события
         ActionPlayButton.onPlay += TurnOnTouchPanel;
-        GameController.onLose += TurnOffTouchPanel;
+        GameService.onLose += TurnOffTouchPanel;
     }
 
     private void OnDisable()
     {   
         ActionPlayButton.onPlay -= TurnOnTouchPanel;
-        GameController.onLose -= TurnOffTouchPanel;
+        GameService.onLose -= TurnOffTouchPanel;
     }
 
-    private void Start()
+    private void Awake()
     {
         panelButton = GetComponent<Button>();
     }

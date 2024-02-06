@@ -6,7 +6,7 @@ using UnityEngine;
 public class ActionContinueButton : MonoBehaviour
 {
     public static Action onContinueGame;
-
+    
     public GameObject pausePanel;
 
     private void OnEnable()

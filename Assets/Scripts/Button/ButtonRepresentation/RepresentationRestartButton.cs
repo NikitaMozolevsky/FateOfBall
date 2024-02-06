@@ -4,27 +4,29 @@ using UnityEngine;
 
 public class RepresentationRestartButton : MonoBehaviour
 {
+    private GameService GameService = GameService.instance;
+    
+    private RectTransform buttonRectTransform;
     private Vector2 targetShowRestartPosition;
     private Vector2 targetHideRestartPosition;
-    private RectTransform buttonRectTransform;
-    
+
     public AnimationCurve hideCurve;
     public AnimationCurve showCurve;
     
-    private float targetShowXPosition = 330f; // Позиция видимости кнопки Restart
-    private float targetHideXPosition = 500f; // Позиция сокрытости кнопки Restart
+    private float targetShowXPosition = -100f; // Позиция видимости кнопки Restart
+    private float targetHideXPosition = 100f; // Позиция сокрытости кнопки Restart
     
     private void OnEnable()
     {
-        ActionRestartButton.onRestartGame += OnRestart;
-        GameController.onLose += OnLose;
+        ActionRestartButton.onRestartGame += HideRestartButton;
+        GameService.onLose += ShowRestartButton;
         
     }
     private void OnDisable()
     {
         
-        ActionRestartButton.onRestartGame -= OnRestart;
-        GameController.onLose -= OnLose;
+        ActionRestartButton.onRestartGame -= HideRestartButton;
+        GameService.onLose -= ShowRestartButton;
 
     }
     
@@ -36,17 +38,22 @@ public class RepresentationRestartButton : MonoBehaviour
         targetHideRestartPosition = new Vector2
             (targetHideXPosition, buttonRectTransform.anchoredPosition.y);
     }
-    
-    private void OnRestart()
-    { // Скрывает кнопку restart за канвас
-        StartCoroutine(RepresentationButtonAction.instance.ChangeButtonPosition
-            (gameObject, targetHideRestartPosition, showCurve));
-    }
-    
-    private void OnLose()
-    { // Показывает кнопку restart из-за канваса
+
+    private void ShowRestartButton()
+    { // Показывает кнопку restart из-за канваса.
         StartCoroutine(RepresentationButtonAction.instance.ChangeButtonPosition
             (gameObject, targetShowRestartPosition, showCurve));
     }
     
+    // Сокрытие кнопки Restart при нажатии.
+    // Временное отключение.
+    private void HideRestartButton()
+    { 
+        // Отключение кнопки на 1 секунду, что бы не мешала игре.
+        StartCoroutine(RepresentationButtonAction.instance.TemporarilyDeactivateButton
+            (gameObject));
+        // Скрывает кнопку restart за канвас.
+        StartCoroutine(RepresentationButtonAction.instance.ChangeButtonPosition
+            (gameObject, targetHideRestartPosition, showCurve));
+    }
 }

@@ -4,76 +4,81 @@ using System.Collections.Generic;
 using Cinemachine;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class SphereController : MonoBehaviour
 {
     // Единственный экземпляр синглтона
     public static SphereController instance { get; private set; }
+    
     private SphereService sphereService = SphereService.instance;
+    private GameService gameService = GameService.instance;
     private PlatformRemoveService prs = PlatformRemoveService.instance;
     private PlatformGenerationService pgs = PlatformGenerationService.instance;
     
+    // Вызывается при каждом столкновении с шаром.
+    public static UnityAction<Collision> onBallCollision;
+    // Вызывается при первом столкновении с шаром.
+    public static UnityAction onFirstBallCollision;
+    // Вызывается при каждой коллизии сферы.
+    /*public static UnityAction onDropPlatform;*/
+    
     public GameObject sphere;
-    public static Action onBallCollision;
-
-    public GameObject platform;
-    public Transform followSphere;
-        
-    private Rigidbody sphereRigitbody;
-    private bool isFirstCollision = true;
-    private Collision firstCollision;
+    public Transform sphereStartPosition;
 
     private SphereController()
     {
     }
-
-    private void Awake()
-    {
-        CreateSingleton();
-        sphereRigitbody = sphere.GetComponent<Rigidbody>();
-    }
-
+    
     private void CreateSingleton() // Создание экземпляра
     {
         if (instance == null)
         {
             instance = this;
-            DontDestroyOnLoad(gameObject);
             return;
         }
         Destroy(gameObject);
     }
+    
+    private void OnEnable()
+    {
+        ActionRestartButton.afterRestartGame += SetSphereStartPosition;
+        // Остановка и запуск времени.
+        /*onFirstBallCollision += gameService.StopTime;
+        ActionPlayButton.onPlay += gameService.ContinueTime;*/
+    }
+
+    private void OnDisable()
+    {
+        ActionRestartButton.afterRestartGame -= SetSphereStartPosition;
+        /*onFirstBallCollision -= gameService.StopTime;
+        ActionPlayButton.onPlay -= gameService.ContinueTime;*/
+    }
+
+    private void Awake()
+    {
+        CreateSingleton();
+    }
 
     private void FixedUpdate() // Для плавности движения
     {
-        if (GameController.playCondition)
-        {
-            MoveSphere(); 
-        }
+        MoveSphere();
     }
-
-    private void MoveSphere()
-    {
-        if (sphereRigitbody != null && platform != null)
-        {
-            sphereService.MoveSphereWithTransform(sphere, platform);
-        }
-        else
-        {
-            Debug.LogWarning("Rigidbody or platform is null");
-        }
-    }
-
+    
+    // Столкновение шара с платформой.
     private void OnCollisionEnter(Collision collision)
     {
-        // Столкновение шара с платформой
-        Debug.Log("Collision!");
-        onBallCollision?.Invoke();
-        prs.CheckMissedPlatformCollisionGPT(collision, PlatformController.instance.platformList);
+        sphereService.OnCollisionEnter(collision);
     }
-
-    public bool SphereOutOfPlatform()
+    
+    private void MoveSphere()
     {
-        return sphereService.SphereOutOfPlatform(sphere, platform);
+        sphereService.MoveSphere(sphere);
+    }
+    
+    // Возвращает шар на стартовую позицию с которой он падает.
+    private void SetSphereStartPosition()
+    {
+        sphereService.SetSphereStartPosition(sphere, sphereStartPosition);
     }
 }
