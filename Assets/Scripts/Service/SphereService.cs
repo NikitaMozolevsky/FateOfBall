@@ -1,21 +1,17 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class SphereService
 {
     private static SphereService _instance;
 
     // Отвечает за движение шара.
-    public bool sphereMovement = false;
+    public static bool sphereMovement = false;
     // Отвечает за поворот.
-    public bool isLeft = true;
+    public static bool isLeft = true;
     // Отвечает за первое столкновение.
-    public bool isFirstCollision = true;
+    public static bool isFirstCollision = true;
     // Было ли боковое столкновение луча сферы с платформой. 
-    public bool sphereRayTouchedPlatfrom = false;
+    public static bool sphereRayTouchedPlatfrom = false;
     // Скорость сферы.
     private const float SPHERE_SPEED = 0.2f;
     // Точка по Y ниже ниже которой для шара фиксируется поражение.
@@ -70,13 +66,8 @@ public class SphereService
         Debug.Log("isTouched: " + isLeft);
     }
 
-    public bool SphereOutOfPlatformV1(GameObject sphere, GameObject platform)
-    {
-        return sphere.transform.position.y < platform.transform.position.y;
-    }
-
     // Возвращает true если шар оказался ниже определенного уровня.
-    public bool SphereOutOfPlatform()
+    public static bool SphereOutOfPlatform()
     {
         Vector3 currentSpherePosition = 
             SphereController.instance.sphere.transform.localPosition;
@@ -121,8 +112,37 @@ public class SphereService
         {
             SphereController.onBallCollision?.Invoke(collision);
         }
-        
-        /*prs.CheckMissedPlatformCollisionGPT
-         (collision, PlatformController.instance.platformList);*/
+    }
+
+    // Отслеживает касания по экрану для управления шаром.
+    public void ScreenTouchManager()
+    {
+        if (GameService.playCondition)
+        {
+            // Проверяем, есть ли касания на сенсорном экране
+            if (Input.touchCount > 0)
+            {
+                // Перебираем все касания
+                for (int i = 0; i < Input.touchCount; i++)
+                {
+                    // Получаем текущее касание
+                    Touch touch = Input.GetTouch(i);
+
+                    // Проверяем, было ли начало касания
+                    if (touch.phase == TouchPhase.Began)
+                    {
+                        // Меняем направление шара на противоположное
+                        ToggleBoolean();
+                        // Звук смены направления.
+                        ChangeDirectionSound();
+                    }
+                }
+            }
+        }
+    }
+
+    private void ChangeDirectionSound()
+    {
+        GameController.instance.audioSource.PlayOneShot(SphereController.instance.clickSound);
     }
 }

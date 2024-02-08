@@ -13,6 +13,7 @@ public class RepresentationPlayButton : MonoBehaviour
       
     public AnimationCurve showCurve;
     public AnimationCurve hideCurve;
+    public AudioClip moveButtonSound;
     
     private float elapsedTime;
     private float targetShowYPosition = 300f; // Позиция видимости кнопки Play.
@@ -28,14 +29,17 @@ public class RepresentationPlayButton : MonoBehaviour
     private void OnEnable()
     {
         SphereController.onFirstBallCollision += ShowPlayButton;
+        SphereController.onFirstBallCollision += ShowPlayButtonSound;
         ActionPlayButton.onPlay += HidePlayButton;
-        
+        /*ActionPlayButton.onPlay += HidePlayButtonSound;*/
     }
     
     private void OnDisable()
     {
         SphereController.onFirstBallCollision -= ShowPlayButton;
+        SphereController.onFirstBallCollision -= ShowPlayButtonSound;
         ActionPlayButton.onPlay -= HidePlayButton;
+        /*ActionPlayButton.onPlay -= HidePlayButtonSound;*/
     }
 
     // Показ кноки Play при ударе о платформу (первой коллизии).
@@ -56,6 +60,15 @@ public class RepresentationPlayButton : MonoBehaviour
         StartCoroutine(RepresentationButtonAction.instance.TemporarilyDeactivateButton
             (gameObject));
     }
-    
+
+    private void ShowPlayButtonSound()
+    {
+        StartCoroutine(RepresentationButtonAction.instance.ShowButtonSound(moveButtonSound));
+    }
+
+    private void HidePlayButtonSound()
+    {
+        RepresentationButtonAction.instance.HideButtonSound(moveButtonSound);
+    }
 }
  

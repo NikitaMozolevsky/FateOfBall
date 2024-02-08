@@ -32,7 +32,6 @@ public class RepresentationPauseButton : MonoBehaviour
         GameService.onLose -= RemovePauseButton;
         ActionPauseButton.onPauseGame -= DeletePauseButton;
         ActionContinueButton.onContinueGame -= RefreshPauseButton;
-        
     }
 
     private void Start()

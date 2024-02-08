@@ -1,8 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Cinemachine;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -20,11 +15,11 @@ public class SphereController : MonoBehaviour
     public static UnityAction<Collision> onBallCollision;
     // Вызывается при первом столкновении с шаром.
     public static UnityAction onFirstBallCollision;
-    // Вызывается при каждой коллизии сферы.
-    /*public static UnityAction onDropPlatform;*/
     
     public GameObject sphere;
     public Transform sphereStartPosition;
+    // Звук касания.
+    public AudioClip clickSound;
 
     private SphereController()
     {
@@ -58,6 +53,11 @@ public class SphereController : MonoBehaviour
     private void Awake()
     {
         CreateSingleton();
+    }
+
+    private void Update()
+    {
+        sphereService.ScreenTouchManager();
     }
 
     private void FixedUpdate() // Для плавности движения

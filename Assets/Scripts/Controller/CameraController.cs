@@ -9,6 +9,8 @@ public class CameraController : MonoBehaviour
     public static CameraController instance { get; private set; }
     private CameraService cameraService = CameraService.instance;
 
+    // mainCamera
+    public Camera mainCamera;
     // Камера привязана к шару.
     public CinemachineFreeLook sphereCamera;
     // Камера привязана к точке на которой приземляется шар при первом касании.
@@ -19,6 +21,7 @@ public class CameraController : MonoBehaviour
     
     // Массив цветов которые меняются.
     public Color[] colors;
+
 
     private CameraController()
     {
@@ -63,16 +66,22 @@ public class CameraController : MonoBehaviour
         // GameService.afterRestartGame -= cameraService.FollowSphereCamera;
         SphereController.onFirstBallCollision -= cameraService.FollowSphereCamera;
         GameService.afterRestartGame -= SetSphereCameraStartPosition;
-    }
+    }/*
+    
+    private void OnDestroy()
+    {
+        mainCamera.backgroundColor = colors[0]; 
+    }*/
 
     private void Awake()
     {
         CreateSingleton();
     }
 
-    private void Start()
+    private void Update()
     {
-        StartColorChanger();
+        ColorChange();
+        cameraService.ColorChangeTime();
     }
 
     // Устанавливает повышенный приоритет для камеры следящей за сферой.
@@ -87,12 +96,6 @@ public class CameraController : MonoBehaviour
     private void UpPriorityToMundanePointCamera()
     { 
         cameraService.UpPriorityToMundanePointCamera(sphereCamera, startMundanePositionCamera);
-    }
-
-    // Запускает куратину смены цвета фона.
-    private void StartColorChanger()
-    {
-        StartCoroutine(CameraService.instance.ColorChanger());
     }
 
     // Останавливает смену цвета.
@@ -119,5 +122,11 @@ public class CameraController : MonoBehaviour
     private void SetSphereCameraStartPosition()
     {
         cameraService.SetSphereCameraStartPosition(sphereCamera, startSphereCameraTransform);
+    }
+
+    // Плавно меняет цвет по индексу.
+    private void ColorChange()
+    {
+        cameraService.ColorChange(mainCamera, colors);
     }
 }

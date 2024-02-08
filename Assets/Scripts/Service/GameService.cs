@@ -8,7 +8,6 @@
     {
         
         private static GameService _instance;
-        private SphereService sphereService = SphereService.instance;
         
         // Выход за пределы.
         public static UnityAction onLose;
@@ -52,7 +51,7 @@
     public void CheckLose()
     {
         // Поражение.
-        if (sphereService.SphereOutOfPlatform() && !loseCondition)
+        if (SphereService.SphereOutOfPlatform() && !loseCondition)
         {
             Debug.Log("Lose!");
             onLose?.Invoke();
@@ -70,7 +69,7 @@
         Debug.Log("Play");
         
         playCondition = true;
-        sphereService.sphereMovement = true;
+        SphereService.sphereMovement = true;
     }
 
     // Когда камера в начальном положении - вызывается событие.
@@ -85,9 +84,9 @@
     public void ResetOnRestartVariables()
     {
         // Для появления кнопки Play устанавливаем что еще не было касания патформы.
-        sphereService.isFirstCollision = true;
+        SphereService.isFirstCollision = true;
         // Установить поворот при начале игры на лево.
-        sphereService.isLeft = true;
+        SphereService.isLeft = true;
     }
 
     // Изменяет переменные когда камера в стартовом положении
@@ -96,8 +95,8 @@
         loseCondition = false;
         // Устанавливает bool переменную отвечающую за ренерацию плтформа.
         platformGeneration = true;
-        sphereService.sphereMovement = false;
-        sphereService.sphereRayTouchedPlatfrom = false;
+        SphereService.sphereMovement = false;
+        SphereService.sphereRayTouchedPlatfrom = false;
         PlatformGenerationService.firstTwoPlatformsCreated = false;
     }
     
@@ -108,5 +107,10 @@
         platformGeneration = false;
         playCondition = false;
         loseCondition = true;
+    }
+
+    public static void PlaySound(AudioClip audioClip)
+    {
+        GameController.instance.audioSource.PlayOneShot(audioClip);
     }
 }

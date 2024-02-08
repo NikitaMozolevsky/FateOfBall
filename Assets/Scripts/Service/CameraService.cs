@@ -7,20 +7,20 @@ using UnityEngine;
 public class CameraService
 {
     private static CameraService _instance;
-    private SphereService sphereService = SphereService.instance;
     
     // Переменная отвечающая за то разрешается ли менять цвет или нет.
     private bool colorChangerActive = false;
-    
-    // Время за которое которое меняется цвет.
-    public const float COLOR_TRANSITION_DURATION = 5f;
-    // Задержка перед началом изменения цвета на новый.
-    public const float DELAY_BEFORE_STARTING_COLOR_CHANGE = 1f;
+    private float currentTime;
+    private int colorIndex;
     // Время за кототое main камера перемещается к другой freeLook камере.
     public const float TIME_TO_SET_CAMERA_POSITION = 2f;
     // Приоритеты камер.
     public const int HIGH_PRIORITY = 11;
     public const int LOW_PRIORITY = 9;
+    // Скорость изменения цвета. (совсем не точно)
+    public const float COLOR_CHANGE_SPEED = 4;
+    // Как долго будет один цвет на экране. (совсем не точно)
+    public float ONE_COLOR_DURATION_TIME = 4;
 
     private CameraService()
     {
@@ -37,29 +37,6 @@ public class CameraService
             return _instance;
         }
     }
-
-    // Куратина смены фона.
-    public IEnumerator ColorChanger()
-    {
-        while (GameService.playCondition)
-        {
-            foreach (Color targetColor in CameraController.instance.colors)
-            {
-                float t = 0f;
-                Color startColor = Camera.main.backgroundColor;
-
-                while (t < 1f && colorChangerActive)
-                {
-                    t += Time.deltaTime / COLOR_TRANSITION_DURATION;
-                    Camera.main.backgroundColor = Color.Lerp(startColor, targetColor, t);
-                    yield return null;
-                }
-
-                // Ждем перед следующим цветом
-                yield return new WaitForSeconds(DELAY_BEFORE_STARTING_COLOR_CHANGE);
-            }
-        }
-    }
     
     // Устанавливает повышенный приоритет для камеры следящей за сферой.
     // Срабатывает при первом касании.
@@ -68,7 +45,7 @@ public class CameraService
     {
         // Смена камеры на привязанную к шару если это первое касание.
         // Попробую сделать при помощи события.
-        if (sphereService.isFirstCollision)
+        if (SphereService.isFirstCollision)
         {
             sphereCamera.m_Priority = HIGH_PRIORITY;
             startMundanePositionCamera.m_Priority = LOW_PRIORITY;
@@ -119,5 +96,42 @@ public class CameraService
         (CinemachineFreeLook sphereCamera, Transform sphereCameraStartTransform)
     {
         sphereCamera.transform.position = sphereCameraStartTransform.position;
+    }
+    
+    public void ColorChange(Camera mainCamera, Color[] colors)
+    {
+        if (GameService.playCondition)
+        {
+            // Плавно меняет цвет по индексу.
+            mainCamera.backgroundColor = Color.Lerp
+                (mainCamera.backgroundColor, colors[colorIndex], COLOR_CHANGE_SPEED * Time.deltaTime);
+        }
+    }
+    
+    // Сбрасывает время для изменения цвета.
+    public void ColorChangeTime()
+    {
+        if (GameService.playCondition)
+        {
+            if (currentTime <= 0)
+            {
+                colorIndex++;
+                CheckColorIndex();
+                currentTime = ONE_COLOR_DURATION_TIME;
+            }
+            else
+            {
+                currentTime -= Time.deltaTime;
+            }
+        }
+    }
+    
+    // Сбрасывает индекс цвета.
+    private void CheckColorIndex()
+    {
+        if (colorIndex >= CameraController.instance.colors.Length)
+        {
+            colorIndex = 0;
+        }
     }
 }

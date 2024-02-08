@@ -9,6 +9,9 @@ public class GameController : MonoBehaviour
     
     public static GameController instance { get; private set; }
     private GameService gameService = GameService.instance;
+    
+    // Для воспроизведения звука.
+    public AudioSource audioSource;
 
     private GameController()
     {
