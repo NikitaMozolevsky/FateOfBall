@@ -45,16 +45,12 @@ public class SphereService
                     // Движение по Z
                     targetDirection = sphere.transform.forward;
                     sphere.transform.position += targetDirection * SPHERE_SPEED;
-                    /*sphere.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
-                    sphere.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePositionX;*/
                 }
                 else
                 {
                     // Движение по X
                     targetDirection = sphere.transform.right;
                     sphere.transform.position += targetDirection * SPHERE_SPEED;
-                    /*sphere.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
-                    sphere.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePositionZ;*/
                 }
             }
         }
@@ -63,7 +59,6 @@ public class SphereService
     public void ToggleBoolean()
     { // Изменение направления
         isLeft = !isLeft;
-        Debug.Log("isTouched: " + isLeft);
     }
 
     // Возвращает true если шар оказался ниже определенного уровня.

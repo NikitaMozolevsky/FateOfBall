@@ -2,21 +2,32 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class ActionPauseButton : MonoBehaviour
 {
-    public static Action onPauseGame;
+    public static UnityAction onPauseGame;
     
     public GameObject pausePanel;
 
-    private void OnEnable()
+    private void SubscribeEvents()
     {
         onPauseGame += OnPausePanel;
     }
     
-    private void OnDisable()
+    private void UnsubscribeEvents()
     {
         onPauseGame -= OnPausePanel;
+    }
+
+    private void Start()
+    {
+        SubscribeEvents();
+    }
+
+    private void OnApplicationQuit()
+    {
+        UnsubscribeEvents();
     }
 
     public void Pause()

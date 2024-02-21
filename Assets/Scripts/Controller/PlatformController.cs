@@ -13,9 +13,10 @@ public class PlatformController : MonoBehaviour
 {
     public static PlatformController instance { get; private set; }
     private PlatformRemoveService prs = PlatformRemoveService.instance;
-    private PlatformMovementService pms = PlatformMovementService.instance;
     private PlatformGenerationService pgs = PlatformGenerationService.instance;
-    private GameService gameService = GameService.instance;
+    
+    // Платформа начала падение.
+    public static UnityAction onDropPlatform;
 
     // Плоатформы которые поднимаются.
     //public List<GameObject> raisingPlatformList = new(); // Очередь из платформ
@@ -57,35 +58,38 @@ public class PlatformController : MonoBehaviour
         }
     }
     
-    private void OnEnable()
+    private void SubscribeEvents()
     {
-        GameService.onStartGame += pgs.CreateCurrentGenerationPoint;
+        GameController.onStartGame += pgs.CreateCurrentGenerationPoint;
+        GameController.onStartGame += GenerateFirstPlatforms;
         ActionPlayButton.onPlay += RemoveFirstPlatform;
         SphereController.onBallCollision += CollisionWithPlatform;
-        PlatformRemoveService.onDropPlatform += GenerateAndRaisePlatform;
-        GameService.onLose += DropAllRaisedPlatforms;
-        GameService.onLose += AssignAllRaisedPlatfornsAsDropped;
-        GameService.afterRestartGame += ClearDroppedList;
-        GameService.afterRestartGame += pgs.SetGenerationPointToStartPosition;;
-        GameService.afterRestartGame += GenerateFirstPlatforms;
+        onDropPlatform += GenerateAndRaisePlatform;
+        GameController.onLose += DropAllRaisedPlatforms;
+        GameController.onLose += AssignAllRaisedPlatfornsAsDropped;
+        GameController.afterRestartGame += ClearDroppedList;
+        GameController.afterRestartGame += pgs.SetGenerationPointToStartPosition;;
+        GameController.afterRestartGame += GenerateFirstPlatforms;
     }
 
-    private void OnDisable()
+    private void UnsubscribeEvents()
     {
-        GameService.onStartGame -= pgs.CreateCurrentGenerationPoint;
+        GameController.onStartGame -= pgs.CreateCurrentGenerationPoint;
+        GameController.onStartGame -= GenerateFirstPlatforms;
         ActionPlayButton.onPlay -= RemoveFirstPlatform;
         SphereController.onBallCollision -= CollisionWithPlatform;
-        PlatformRemoveService.onDropPlatform -= GenerateAndRaisePlatform;
-        GameService.onLose -= DropAllRaisedPlatforms;
-        GameService.onLose -= AssignAllRaisedPlatfornsAsDropped;
-        GameService.afterRestartGame -= ClearDroppedList;
-        GameService.afterRestartGame -= pgs.SetGenerationPointToStartPosition;
-        GameService.afterRestartGame -= GenerateFirstPlatforms;
+        onDropPlatform -= GenerateAndRaisePlatform;
+        GameController.onLose -= DropAllRaisedPlatforms;
+        GameController.onLose -= AssignAllRaisedPlatfornsAsDropped;
+        GameController.afterRestartGame -= ClearDroppedList;
+        GameController.afterRestartGame -= pgs.SetGenerationPointToStartPosition;
+        GameController.afterRestartGame -= GenerateFirstPlatforms;
     }
 
     private void Awake()
     {
         CreateSingleton();
+        SubscribeEvents();
     }
 
     private void Start()
@@ -97,6 +101,11 @@ public class PlatformController : MonoBehaviour
     private void Update()
     {
         InvisibleDroppedPlatformDestroyer();
+    }
+
+    private void OnApplicationQuit()
+    {
+        UnsubscribeEvents();
     }
 
     public GameObject CreatePlatformObject(Vector3 spawnPosition)

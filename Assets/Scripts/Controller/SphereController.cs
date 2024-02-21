@@ -1,15 +1,13 @@
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class SphereController : MonoBehaviour
 {
     // Единственный экземпляр синглтона
-    public static SphereController instance { get; private set; }
+        public static SphereController instance { get; private set; }
     
     private SphereService sphereService = SphereService.instance;
-    private GameService gameService = GameService.instance;
-    private PlatformRemoveService prs = PlatformRemoveService.instance;
-    private PlatformGenerationService pgs = PlatformGenerationService.instance;
     
     // Вызывается при каждом столкновении с шаром.
     public static UnityAction<Collision> onBallCollision;
@@ -35,24 +33,20 @@ public class SphereController : MonoBehaviour
         Destroy(gameObject);
     }
     
-    private void OnEnable()
+    private void SubscribeEvents()
     {
         ActionRestartButton.afterRestartGame += SetSphereStartPosition;
-        // Остановка и запуск времени.
-        /*onFirstBallCollision += gameService.StopTime;
-        ActionPlayButton.onPlay += gameService.ContinueTime;*/
     }
 
-    private void OnDisable()
+    private void UnsubscribeEvents()
     {
         ActionRestartButton.afterRestartGame -= SetSphereStartPosition;
-        /*onFirstBallCollision -= gameService.StopTime;
-        ActionPlayButton.onPlay -= gameService.ContinueTime;*/
     }
 
     private void Awake()
     {
         CreateSingleton();
+        SubscribeEvents();
     }
 
     private void Update()
@@ -64,7 +58,12 @@ public class SphereController : MonoBehaviour
     {
         MoveSphere();
     }
-    
+
+    private void OnApplicationQuit()
+    {
+        UnsubscribeEvents();
+    }
+
     // Столкновение шара с платформой.
     private void OnCollisionEnter(Collision collision)
     {

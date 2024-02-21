@@ -18,34 +18,37 @@ public class RepresentationPlayButton : MonoBehaviour
     private float elapsedTime;
     private float targetShowYPosition = 300f; // Позиция видимости кнопки Play.
     private float targetHideYPosition = -100f; // Позиция сокрытости кнопки Play.
-    
 
-    private void Start()
-    {
-        targetShowPlayPosition = new Vector2(0, targetShowYPosition);
-        targetHidePlayPosition = new Vector2(0, targetHideYPosition);
-    }
-
-    private void OnEnable()
+    private void SubscribeEvents()
     {
         SphereController.onFirstBallCollision += ShowPlayButton;
         SphereController.onFirstBallCollision += ShowPlayButtonSound;
         ActionPlayButton.onPlay += HidePlayButton;
-        /*ActionPlayButton.onPlay += HidePlayButtonSound;*/
     }
     
-    private void OnDisable()
+    private void UnsubscribeEvents()
     {
         SphereController.onFirstBallCollision -= ShowPlayButton;
         SphereController.onFirstBallCollision -= ShowPlayButtonSound;
         ActionPlayButton.onPlay -= HidePlayButton;
-        /*ActionPlayButton.onPlay -= HidePlayButtonSound;*/
+    }
+    
+    private void Start()
+    {
+        targetShowPlayPosition = new Vector2(0, targetShowYPosition);
+        targetHidePlayPosition = new Vector2(0, targetHideYPosition);
+        SubscribeEvents();
+    }
+    
+    private void OnApplicationQuit()
+    {
+        UnsubscribeEvents();
     }
 
     // Показ кноки Play при ударе о платформу (первой коллизии).
     private void ShowPlayButton()
     {
-        StartCoroutine(RepresentationButtonAction.instance.ChangeButtonPosition
+        StartCoroutine(RepresentationButton.MoveElementPosition
                 (gameObject, targetShowPlayPosition, showCurve));
     }
 
@@ -54,21 +57,22 @@ public class RepresentationPlayButton : MonoBehaviour
     private void HidePlayButton()
     {
         // Сокрытие кнопки Play.
-        StartCoroutine(RepresentationButtonAction.instance.ChangeButtonPosition
+        StartCoroutine(RepresentationButton.MoveElementPosition
             (gameObject, targetHidePlayPosition, hideCurve));
         // Отключение кнопки на 1 секунду, что бы не мешала игре.
-        StartCoroutine(RepresentationButtonAction.instance.TemporarilyDeactivateButton
+        StartCoroutine(RepresentationButton.instance.TemporarilyDeactivateButton
             (gameObject));
     }
 
+    // Звучание при нажатии кнопки.
     private void ShowPlayButtonSound()
     {
-        StartCoroutine(RepresentationButtonAction.instance.ShowButtonSound(moveButtonSound));
+        StartCoroutine(RepresentationButton.ShowButtonSound(moveButtonSound));
     }
 
     private void HidePlayButtonSound()
     {
-        RepresentationButtonAction.instance.HideButtonSound(moveButtonSound);
+        RepresentationButton.instance.HideButtonSound(moveButtonSound);
     }
 }
  

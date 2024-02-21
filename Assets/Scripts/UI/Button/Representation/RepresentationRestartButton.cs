@@ -16,17 +16,17 @@ public class RepresentationRestartButton : MonoBehaviour
     private float targetShowXPosition = -100f; // Позиция видимости кнопки Restart
     private float targetHideXPosition = 100f; // Позиция сокрытости кнопки Restart
     
-    private void OnEnable()
+    private void SubscribeEvents()
     {
         ActionRestartButton.onRestartGame += HideRestartButton;
-        GameService.onLose += ShowRestartButton;
+        GameController.onLose += ShowRestartButton;
         
     }
-    private void OnDisable()
+    private void UnsubscribeEvents()
     {
         
         ActionRestartButton.onRestartGame -= HideRestartButton;
-        GameService.onLose -= ShowRestartButton;
+        GameController.onLose -= ShowRestartButton;
 
     }
     
@@ -37,12 +37,18 @@ public class RepresentationRestartButton : MonoBehaviour
             (targetShowXPosition, buttonRectTransform.anchoredPosition.y);
         targetHideRestartPosition = new Vector2
             (targetHideXPosition, buttonRectTransform.anchoredPosition.y);
+        SubscribeEvents();
+    }
+    
+    private void OnApplicationQuit()
+    {
+        UnsubscribeEvents();
     }
 
     private void ShowRestartButton()
     { // Показывает кнопку restart из-за канваса.
-        StartCoroutine(RepresentationButtonAction.instance.ChangeButtonPosition
-            (gameObject, targetShowRestartPosition, showCurve));
+        StartCoroutine(RepresentationButton.MoveElementPosition
+            (gameObject, targetShowRestartPosition, CanvasManager.instance.showElementCurve));
     }
     
     // Сокрытие кнопки Restart при нажатии.
@@ -50,10 +56,10 @@ public class RepresentationRestartButton : MonoBehaviour
     private void HideRestartButton()
     { 
         // Отключение кнопки на 1 секунду, что бы не мешала игре.
-        StartCoroutine(RepresentationButtonAction.instance.TemporarilyDeactivateButton
+        StartCoroutine(RepresentationButton.instance.TemporarilyDeactivateButton
             (gameObject));
         // Скрывает кнопку restart за канвас.
-        StartCoroutine(RepresentationButtonAction.instance.ChangeButtonPosition
-            (gameObject, targetHideRestartPosition, showCurve));
+        StartCoroutine(RepresentationButton.MoveElementPosition
+            (gameObject, targetHideRestartPosition, CanvasManager.instance.hideElementCurve));
     }
 }

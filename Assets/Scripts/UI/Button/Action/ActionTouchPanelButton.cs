@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+// TouchPanel - отключена.
 public class ActionTouchPanelButton : MonoBehaviour
 {
     
@@ -11,21 +12,31 @@ public class ActionTouchPanelButton : MonoBehaviour
     
     private Button panelButton;
 
-    private void OnEnable()
+    private void SubscribeEvents()
     { // Подписка и отписка от события
         ActionPlayButton.onPlay += TurnOnTouchPanel;
-        GameService.onLose += TurnOffTouchPanel;
+        GameController.onLose += TurnOffTouchPanel;
     }
 
-    private void OnDisable()
+    private void UnsubscribeEvents()
     {   
         ActionPlayButton.onPlay -= TurnOnTouchPanel;
-        GameService.onLose -= TurnOffTouchPanel;
+        GameController.onLose -= TurnOffTouchPanel;
     }
 
     private void Awake()
     {
         panelButton = GetComponent<Button>();
+    }
+    
+    private void Start()
+    {
+        SubscribeEvents();
+    }
+    
+    private void OnApplicationQuit()
+    {
+        UnsubscribeEvents();
     }
 
     private void TurnOnTouchPanel()

@@ -9,14 +9,24 @@ public class ActionContinueButton : MonoBehaviour
     
     public GameObject pausePanel;
 
-    private void OnEnable()
+    private void SubscribeEvents()
     {
         onContinueGame += OffPausePanel;
     }
 
-    private void OnDisable()
+    private void UnsubscribeEvents()
     {
         onContinueGame -= OffPausePanel;
+    }
+
+    private void Start()
+    {
+        SubscribeEvents();
+    }
+
+    private void OnApplicationQuit()
+    {
+        UnsubscribeEvents();
     }
 
     public void OnClick()

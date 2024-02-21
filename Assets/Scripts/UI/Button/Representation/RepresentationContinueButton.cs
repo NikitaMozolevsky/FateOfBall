@@ -2,25 +2,35 @@
 
 public class RepresentationContinueButton : MonoBehaviour
 {
-    private void OnEnable()
+    private void SubscribeEvents()
     {
         ActionPauseButton.onPauseGame += ShowContinueButton;
         ActionContinueButton.onContinueGame += HideCountinueButton;
     }
 
-    private void OnDisable()
+    private void UnsubscribeEvents()
     {
         ActionPauseButton.onPauseGame += ShowContinueButton;
         ActionContinueButton.onContinueGame += HideCountinueButton;
+    }
+    
+    private void Start()
+    {
+        SubscribeEvents();
+    }
+    
+    private void OnApplicationQuit()
+    {
+        UnsubscribeEvents();
     }
 
     private void ShowContinueButton()
     {
-        RepresentationButtonAction.instance.ButtonRendering(gameObject, true);
+        RepresentationButton.instance.ButtonRendering(gameObject, true);
     }
 
     private void HideCountinueButton()
     {
-        RepresentationButtonAction.instance.ButtonRendering(gameObject, false);
+        RepresentationButton.instance.ButtonRendering(gameObject, false);
     }
 }

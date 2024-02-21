@@ -3,14 +3,20 @@ using System.Collections;
 using System.Collections.Generic;
 using Cinemachine;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class CameraController : MonoBehaviour
 {
     public static CameraController instance { get; private set; }
     private CameraService cameraService = CameraService.instance;
 
+    // Для Fade.
+    public Animator animator;
     // mainCamera
     public Camera mainCamera;
+    // recordsCamera
+    public Camera recordsCamera;
     // Камера привязана к шару.
     public CinemachineFreeLook sphereCamera;
     // Камера привязана к точке на которой приземляется шар при первом касании.
@@ -18,9 +24,9 @@ public class CameraController : MonoBehaviour
     // Начальная позиция камеры следящей за шаром.
     // Нужна для возвращения камеры в начальное положение.
     public Transform startSphereCameraTransform;
-    
     // Массив цветов которые меняются.
     public Color[] colors;
+    
 
 
     private CameraController()
@@ -39,49 +45,49 @@ public class CameraController : MonoBehaviour
     }
     
     // Подписка на события.
-    private void OnEnable()
+    private void SubscribeEvents()
     {
         SphereController.onFirstBallCollision += UpPriorityToSphereCamera;
         ActionPlayButton.onPlay += ContinueColorChanger;
         ActionPauseButton.onPauseGame += PauseColorChanger;
         ActionContinueButton.onContinueGame += ContinueColorChanger;
-        GameService.onLose += PauseColorChanger;
-        GameService.onLose += FreezeSphereCamera;
+        GameController.onLose += PauseColorChanger;
+        GameController.onLose += FreezeSphereCamera;
         ActionRestartButton.onRestartGame += UpPriorityToMundanePointCamera;
         // GameService.afterRestartGame += cameraService.FollowSphereCamera;
         SphereController.onFirstBallCollision += cameraService.FollowSphereCamera;
-        GameService.afterRestartGame += SetSphereCameraStartPosition;
+        GameController.afterRestartGame += SetSphereCameraStartPosition;
     }
 
     // Отписка от событий.
-    private void OnDisable()
+    private void UnsubscribeEvents()
     {
         SphereController.onFirstBallCollision -= UpPriorityToSphereCamera;
         ActionPlayButton.onPlay -= ContinueColorChanger;
         ActionPauseButton.onPauseGame -= PauseColorChanger;
         ActionContinueButton.onContinueGame -= ContinueColorChanger;
-        GameService.onLose -= PauseColorChanger;
-        GameService.onLose -= FreezeSphereCamera;
+        GameController.onLose -= PauseColorChanger;
+        GameController.onLose -= FreezeSphereCamera;
         ActionRestartButton.onRestartGame -= UpPriorityToMundanePointCamera;
-        // GameService.afterRestartGame -= cameraService.FollowSphereCamera;
         SphereController.onFirstBallCollision -= cameraService.FollowSphereCamera;
-        GameService.afterRestartGame -= SetSphereCameraStartPosition;
-    }/*
-    
-    private void OnDestroy()
-    {
-        mainCamera.backgroundColor = colors[0]; 
-    }*/
+        GameController.afterRestartGame -= SetSphereCameraStartPosition;
+    }
 
     private void Awake()
     {
         CreateSingleton();
+        SubscribeEvents();
     }
 
     private void Update()
     {
         ColorChange();
         cameraService.ColorChangeTime();
+    }
+
+    private void OnApplicationQuit()
+    {
+        UnsubscribeEvents();
     }
 
     // Устанавливает повышенный приоритет для камеры следящей за сферой.

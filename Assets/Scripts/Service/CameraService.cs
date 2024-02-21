@@ -12,6 +12,8 @@ public class CameraService
     private bool colorChangerActive = false;
     private float currentTime;
     private int colorIndex;
+    private Camera nextCamera;
+    
     // Время за кототое main камера перемещается к другой freeLook камере.
     public const float TIME_TO_SET_CAMERA_POSITION = 2f;
     // Приоритеты камер.
@@ -20,7 +22,7 @@ public class CameraService
     // Скорость изменения цвета. (совсем не точно)
     public const float COLOR_CHANGE_SPEED = 4;
     // Как долго будет один цвет на экране. (совсем не точно)
-    public float ONE_COLOR_DURATION_TIME = 4;
+    public const float ONE_COLOR_DURATION_TIME = 4;
 
     private CameraService()
     {

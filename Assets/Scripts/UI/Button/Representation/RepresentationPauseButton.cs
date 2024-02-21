@@ -18,18 +18,18 @@ public class RepresentationPauseButton : MonoBehaviour
     private bool showPlayButton = false;
     private float targetShowXPosition = -100f; // Позиция видимости кнопки Play.
     private float targetHideXPosition = 100f; // Позиция сокрытости кнопки Play.
-    private void OnEnable()
+    private void SubscribeEvents()
     {
         ActionPlayButton.onPlay += ShowPauseButton;
-        GameService.onLose += RemovePauseButton;
+        GameController.onLose += RemovePauseButton;
         ActionPauseButton.onPauseGame += DeletePauseButton;
         ActionContinueButton.onContinueGame += RefreshPauseButton;
         
     }
-    private void OnDisable()
+    private void UnsubscribeEvents()
     {
         ActionPlayButton.onPlay -= ShowPauseButton;
-        GameService.onLose -= RemovePauseButton;
+        GameController.onLose -= RemovePauseButton;
         ActionPauseButton.onPauseGame -= DeletePauseButton;
         ActionContinueButton.onContinueGame -= RefreshPauseButton;
     }
@@ -41,27 +41,33 @@ public class RepresentationPauseButton : MonoBehaviour
             (targetShowXPosition, buttonRectTransform.anchoredPosition.y);
         targetHidePausePosition = new Vector2
             (targetHideXPosition, buttonRectTransform.anchoredPosition.y);
+        SubscribeEvents();
+    }
+    
+    private void OnApplicationQuit()
+    {
+        UnsubscribeEvents();
     }
 
     private void RemovePauseButton()
     { // Скрывает кнопку паузы за канвас.
-        StartCoroutine(RepresentationButtonAction.instance.ChangeButtonPosition
+        StartCoroutine(RepresentationButton.MoveElementPosition
             (gameObject, targetHidePausePosition, showCurve));
     }
 
     private void ShowPauseButton()
     { // Коказывает кнопку паузы из-за канваса.
-        StartCoroutine(RepresentationButtonAction.instance.ChangeButtonPosition
+        StartCoroutine(RepresentationButton.MoveElementPosition
             (gameObject, targetShowPausePosition, showCurve));
     }
 
     private void DeletePauseButton()
     { // Выключает отображение кнопки.
-        RepresentationButtonAction.instance.ButtonRendering(gameObject, false);
+        RepresentationButton.instance.ButtonRendering(gameObject, false);
     }
 
     private void RefreshPauseButton()
     { // Включает отображение кнопки.
-        RepresentationButtonAction.instance.ButtonRendering(gameObject, true);
+        RepresentationButton.instance.ButtonRendering(gameObject, true);
     }
 }

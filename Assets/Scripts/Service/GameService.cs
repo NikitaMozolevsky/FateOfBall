@@ -3,16 +3,13 @@
     using System.Collections;
     using UnityEngine;
     using UnityEngine.Events;
+    using UnityEngine.SceneManagement;
 
     public class GameService
     {
         
         private static GameService _instance;
         
-        // Выход за пределы.
-        public static UnityAction onLose;
-        public static UnityAction onStartGame;
-        public static UnityAction afterRestartGame;
         // Становится true при нажатии play.
         public static bool playCondition = false;
         public static bool loseCondition = false;
@@ -21,7 +18,6 @@
         // Переменные для управлением временем.
         private int stopTime = 0;
         private int continueTime = 1;
-
         private GameService()
         {
         }
@@ -54,13 +50,13 @@
         if (SphereService.SphereOutOfPlatform() && !loseCondition)
         {
             Debug.Log("Lose!");
-            onLose?.Invoke();
+            GameController.onLose?.Invoke();
         }
     }
 
     public void StartGame()
     {
-        onStartGame?.Invoke();
+        GameController.onStartGame?.Invoke();
     }
     
     // Устанавливает bool переменным соответствующие значения.
@@ -69,7 +65,7 @@
         Debug.Log("Play");
         
         playCondition = true;
-        SphereService.sphereMovement = true;
+        SphereService.sphereMovement = true;    
     }
 
     // Когда камера в начальном положении - вызывается событие.
@@ -77,7 +73,7 @@
     {
         // Время до перехода на новую камеру.
         yield return new WaitForSeconds(CameraService.TIME_TO_SET_CAMERA_POSITION);
-        afterRestartGame?.Invoke();
+        GameController.afterRestartGame?.Invoke();
     }
 
     // Устанавливает переменным соответствующие значения.

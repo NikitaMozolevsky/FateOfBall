@@ -10,10 +10,7 @@ public class PlatformRemoveService
     private static PlatformRemoveService _instance;
     private PlatformMovementService pms = PlatformMovementService.instance;
     private Util util = Util.instance;
-    
-    // Платформа начала падение.
-    public static UnityAction onDropPlatform;
-    
+
     // Время через которое уничтожится платформа после падения.
     public const float TIME_TO_DESTROY_PLATFORM = 1f;
     // Время для пропущенных платформ через которое они падают.
@@ -216,8 +213,8 @@ public class PlatformRemoveService
         GameController.instance.StartCoroutine
             (pms.MovePlatformTowardTarget(platform, false));
         // Вызывается при падении платформы.
-        // Нужени для егнерации.
-        onDropPlatform?.Invoke();
+        // Нужени для егнерации и счетчика очков.
+        PlatformController.onDropPlatform?.Invoke();
     }
     
     // Метод который запускает куратину которая опускает платформу в низ.
