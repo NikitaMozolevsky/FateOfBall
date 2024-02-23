@@ -17,9 +17,7 @@ public class PlatformController : MonoBehaviour
     
     // Платформа начала падение.
     public static UnityAction onDropPlatform;
-
-    // Плоатформы которые поднимаются.
-    //public List<GameObject> raisingPlatformList = new(); // Очередь из платформ
+    
     // Платформы которые подняты.
     public List<GameObject> raisedPlatformList = new(); // Очередь из платформ
     // Плоатформы которые сброшены.
@@ -62,7 +60,7 @@ public class PlatformController : MonoBehaviour
     {
         GameController.onStartGame += pgs.CreateCurrentGenerationPoint;
         GameController.onStartGame += GenerateFirstPlatforms;
-        ActionPlayButton.onPlay += RemoveFirstPlatform;
+        //ActionPlayButton.onPlay += RemoveFirstPlatform;
         SphereController.onBallCollision += CollisionWithPlatform;
         onDropPlatform += GenerateAndRaisePlatform;
         GameController.onLose += DropAllRaisedPlatforms;
@@ -76,7 +74,7 @@ public class PlatformController : MonoBehaviour
     {
         GameController.onStartGame -= pgs.CreateCurrentGenerationPoint;
         GameController.onStartGame -= GenerateFirstPlatforms;
-        ActionPlayButton.onPlay -= RemoveFirstPlatform;
+        //ActionPlayButton.onPlay -= RemoveFirstPlatform;
         SphereController.onBallCollision -= CollisionWithPlatform;
         onDropPlatform -= GenerateAndRaisePlatform;
         GameController.onLose -= DropAllRaisedPlatforms;
@@ -90,12 +88,6 @@ public class PlatformController : MonoBehaviour
     {
         CreateSingleton();
         SubscribeEvents();
-    }
-
-    private void Start()
-    {
-        // Генерирует первые платформы, которые поддерживают постоянное кол-во.
-        GenerateFirstPlatforms();
     }
 
     private void Update()

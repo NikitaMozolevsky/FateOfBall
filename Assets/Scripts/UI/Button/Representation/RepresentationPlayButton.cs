@@ -4,8 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class RepresentationPlayButton : MonoBehaviour
-{
-    private SphereService sphereService = SphereService.instance;
+{       
     
     private RectTransform buttonRectTransform;
     private Vector2 targetShowPlayPosition;
@@ -13,8 +12,7 @@ public class RepresentationPlayButton : MonoBehaviour
       
     public AnimationCurve showCurve;
     public AnimationCurve hideCurve;
-    public AudioClip moveButtonSound;
-    
+
     private float elapsedTime;
     private float targetShowYPosition = 300f; // Позиция видимости кнопки Play.
     private float targetHideYPosition = -100f; // Позиция сокрытости кнопки Play.
@@ -22,14 +20,12 @@ public class RepresentationPlayButton : MonoBehaviour
     private void SubscribeEvents()
     {
         SphereController.onFirstBallCollision += ShowPlayButton;
-        SphereController.onFirstBallCollision += ShowPlayButtonSound;
         ActionPlayButton.onPlay += HidePlayButton;
     }
     
     private void UnsubscribeEvents()
     {
         SphereController.onFirstBallCollision -= ShowPlayButton;
-        SphereController.onFirstBallCollision -= ShowPlayButtonSound;
         ActionPlayButton.onPlay -= HidePlayButton;
     }
     
@@ -62,17 +58,6 @@ public class RepresentationPlayButton : MonoBehaviour
         // Отключение кнопки на 1 секунду, что бы не мешала игре.
         StartCoroutine(RepresentationButton.instance.TemporarilyDeactivateButton
             (gameObject));
-    }
-
-    // Звучание при нажатии кнопки.
-    private void ShowPlayButtonSound()
-    {
-        StartCoroutine(RepresentationButton.ShowButtonSound(moveButtonSound));
-    }
-
-    private void HidePlayButtonSound()
-    {
-        RepresentationButton.instance.HideButtonSound(moveButtonSound);
     }
 }
  

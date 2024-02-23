@@ -8,11 +8,6 @@ using UnityEngine;
 public class PlatformMovementService
 {
     private static PlatformMovementService _instance;
-    
-    // Как долго будет перемещатся платформа.
-    public const float DESIRED_DURATION = 1.5f;
-    // Расстояние на которое переместится платформа по оси Y.
-    public const float Y_DIFFERENCE = 45;
 
     private PlatformMovementService()
     {
@@ -46,14 +41,14 @@ public class PlatformMovementService
             AnimationCurve platformCurve = getTopPosition ? 
                 PlatformController.instance.raiseCurve : PlatformController.instance.dropCurve;
 
-            while (elapsedTime < DESIRED_DURATION)
+            while (elapsedTime < GameController.instance.DESIRED_DURATION)
             {
                 if (!platform)
                 {
                     break;
                 }
                 elapsedTime += Time.deltaTime;
-                float percentageComplete = elapsedTime / DESIRED_DURATION;
+                float percentageComplete = elapsedTime / GameController.instance.DESIRED_DURATION;
                 platform.transform.position = Vector3.Lerp
                     (startPosition, tartgetPosition, platformCurve.Evaluate(percentageComplete));
                 yield return null;
@@ -70,14 +65,14 @@ public class PlatformMovementService
         { // Получение позиции которая выше текущей позиции по Y на Y_DIFFERENCE.
             targetPosition = new Vector3
             (platform.transform.position.x, 
-                platform.transform.position.y + Y_DIFFERENCE, 
+                platform.transform.position.y + GameController.instance.Y_DIFFERENCE, 
                 platform.transform.position.z);
         }
         else
         { // Получение позиции которая ниже текущей позиции по Y на Y_DIFFERENCE.
             targetPosition = new Vector3
             (platform.transform.position.x, 
-                platform.transform.position.y - Y_DIFFERENCE, 
+                platform.transform.position.y - GameController.instance.Y_DIFFERENCE, 
                 platform.transform.position.z);
         }
         return targetPosition;

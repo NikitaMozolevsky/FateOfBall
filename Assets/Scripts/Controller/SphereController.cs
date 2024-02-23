@@ -13,11 +13,11 @@ public class SphereController : MonoBehaviour
     public static UnityAction<Collision> onBallCollision;
     // Вызывается при первом столкновении с шаром.
     public static UnityAction onFirstBallCollision;
+    // Вызывается при смене направления шара.
+    public static UnityAction onChangeSphereDirection;
     
     public GameObject sphere;
     public Transform sphereStartPosition;
-    // Звук касания.
-    public AudioClip clickSound;
 
     private SphereController()
     {
@@ -36,11 +36,13 @@ public class SphereController : MonoBehaviour
     private void SubscribeEvents()
     {
         ActionRestartButton.afterRestartGame += SetSphereStartPosition;
+        onChangeSphereDirection += SphereService.ToogleBoolean;
     }
 
     private void UnsubscribeEvents()
     {
         ActionRestartButton.afterRestartGame -= SetSphereStartPosition;
+        onChangeSphereDirection -= SphereService.ToogleBoolean;
     }
 
     private void Awake()

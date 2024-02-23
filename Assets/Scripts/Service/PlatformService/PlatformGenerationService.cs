@@ -22,14 +22,8 @@ public class PlatformGenerationService
     private int sameTurnCounter = 0;
     // Считает количество платформ, для именования.
     private int platformCounter = 0;
-    // Максимальное кол-во одинаковых поворотов.
-    public const int SAME_TURNS_COUNT = 4;
-    // Минимальное количество платформ.
-    public const int PLATFORM_COUNT = 11;
-    // Время между поднятиями платформ.
-    public const float TIME_BETWEEN_RAISING_PLATFORM = 0.2f;
-    
-    
+
+
     private PlatformGenerationService()
     {
     }
@@ -62,18 +56,6 @@ public class PlatformGenerationService
         }
         platformList.Add(newPlatform);
         return newPlatform;
-    }
-
-    // В Update генерирует платформы, если все удовлетворяет условиям.
-    public IEnumerator PlatformGenerator(List<GameObject> platformList)
-    {
-        // Еали количество
-        if (GameService.instance.platformGeneration && !RaisedPlatformNumberIsSufficent())
-        {
-            // Задержка перед поднятием (можно убрать)
-            yield return new WaitForSeconds(TIME_BETWEEN_RAISING_PLATFORM);
-            GenerateAndRaisePlatform(platformList);
-        }
     }
 
     // Генерирует и поднимает платформу.
@@ -109,7 +91,7 @@ public class PlatformGenerationService
         if (randomSide == previousTurn)
         {
             sameTurnCounter++;
-            if (sameTurnCounter == SAME_TURNS_COUNT)
+            if (sameTurnCounter == GameController.instance.SAME_TURNS_COUNT)
             {
                 randomSide = !randomSide;
             }
@@ -144,7 +126,7 @@ public class PlatformGenerationService
         // Установка Y на уровне отрицательного Y_DIFFERENCE.
         currentPosition.localPosition = new Vector3
         (currentPosition.localPosition.x, 
-            -PlatformMovementService.Y_DIFFERENCE, 
+            -GameController.instance.Y_DIFFERENCE, 
             currentPosition.localPosition.z);
 
         // Перемещение точки спавна новой платформы.
@@ -196,13 +178,13 @@ public class PlatformGenerationService
     // Возвращает достаточно ли платформ подняты.
     public bool RaisedPlatformNumberIsSufficent()
     {
-        return PLATFORM_COUNT == PlatformController.instance.raisedPlatformList.Count;
+        return GameController.instance.PLATFORM_COUNT == PlatformController.instance.raisedPlatformList.Count;
     }
     public IEnumerator GenerateFirstPlatforms(List<GameObject> raisedPlatformList)
     {
-        for (int i = 0; i < PLATFORM_COUNT; i++)
+        for (int i = 0; i < GameController.instance.PLATFORM_COUNT; i++)
         {
-            yield return new WaitForSeconds(TIME_BETWEEN_RAISING_PLATFORM);
+            yield return new WaitForSeconds(GameController.instance.TIME_BETWEEN_RAISING_PLATFORM);
             GenerateAndRaisePlatform(raisedPlatformList);
         }
     }

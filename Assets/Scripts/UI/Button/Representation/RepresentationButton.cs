@@ -83,27 +83,4 @@ public class RepresentationButton
         // Возвращаем кнопку на исходное место
         buttonRect.SetSiblingIndex(originalButtonIndex);
     }
-
-    public static IEnumerator ShowButtonSound(AudioClip audioClip)
-    {
-        float soundDuration = audioClip.length;
-        // Звучание звука не дольше чем движется кнопка.
-        bool soundIsSuitable = soundDuration <= DURATION_OF_BUTTON_MOVEMENT;
-        // Если длительность звука больше чем время появления кнопки - плохо.
-        if (soundIsSuitable)
-        {
-            float timeToPlaySound = DURATION_OF_BUTTON_MOVEMENT - soundDuration;
-            yield return new WaitForSeconds(timeToPlaySound);
-            GameController.instance.audioSource.PlayOneShot(audioClip);
-        }
-        else
-        {
-            Debug.LogWarning("Soud too long!");
-        }
-    }
-
-    public void HideButtonSound(AudioClip audioClip)
-    {
-        GameService.PlaySound(audioClip);
-    }
 }

@@ -13,11 +13,7 @@ public class PlatformRemoveService
 
     // Время через которое уничтожится платформа после падения.
     public const float TIME_TO_DESTROY_PLATFORM = 1f;
-    // Время для пропущенных платформ через которое они падают.
-    public const float TIME_TO_DROP_PLATFORM = 0.2f;
-    // Диапазон времени в котором все видимые и поднятые платформы роняются.
-    public const float TIME_TO_DROP_ALL_PLATFORMS = 1F;
-    
+
     private PlatformRemoveService()
     {
     }
@@ -45,15 +41,7 @@ public class PlatformRemoveService
 
     public void RemovePlatformManually(GameObject platform)
     {
-        // GameController.instance.StartCoroutine(pms.DropPlatform(platform));
         GameController.instance.StartCoroutine(DestroyPlatformThroughTime(platform));
-    }
-    
-    public IEnumerator RemovePlatformManuallyWithRandomDelay(GameObject platform, float delay)
-    {
-        // Удаление с рандомной задержкой.
-        yield return new WaitForSeconds(Random.Range(0f, delay));
-        RemovePlatformManually(platform);
     }
 
     public void ClearDroppedList(List<GameObject> droppedList)
@@ -221,13 +209,13 @@ public class PlatformRemoveService
     // Срабатывает с задержкой.
     public IEnumerator DropPlatformWithDelay(GameObject platform)
     {
-        yield return new WaitForSeconds(TIME_TO_DROP_PLATFORM);
+        yield return new WaitForSeconds(GameController.instance.TIME_TO_DROP_PLATFORM);
         DropPlatform(platform);
     }
 
     public IEnumerator DropPlatformWithRandomDelay(GameObject platform)
     {
-        float randomTimeToDropPlatform = util.GetRandomFloatInRange(TIME_TO_DROP_PLATFORM);
+        float randomTimeToDropPlatform = util.GetRandomFloatInRange(GameController.instance.TIME_TO_DROP_PLATFORM);
         yield return new WaitForSeconds(randomTimeToDropPlatform);
         DropPlatform(platform);
     }

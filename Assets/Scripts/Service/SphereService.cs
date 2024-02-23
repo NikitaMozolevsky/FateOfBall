@@ -12,8 +12,6 @@ public class SphereService
     public static bool isFirstCollision = true;
     // Было ли боковое столкновение луча сферы с платформой. 
     public static bool sphereRayTouchedPlatfrom = false;
-    // Скорость сферы.
-    private const float SPHERE_SPEED = 0.2f;
     // Точка по Y ниже ниже которой для шара фиксируется поражение.
     private const float Y_LOSE_POSITION = -3;
     public static SphereService instance
@@ -44,19 +42,19 @@ public class SphereService
                 {
                     // Движение по Z
                     targetDirection = sphere.transform.forward;
-                    sphere.transform.position += targetDirection * SPHERE_SPEED;
+                    sphere.transform.position += targetDirection * GameController.instance.SPHERE_SPEED;
                 }
                 else
                 {
                     // Движение по X
                     targetDirection = sphere.transform.right;
-                    sphere.transform.position += targetDirection * SPHERE_SPEED;
+                    sphere.transform.position += targetDirection * GameController.instance.SPHERE_SPEED;
                 }
             }
         }
     }
     
-    public void ToggleBoolean()
+    public static void ToogleBoolean()
     { // Изменение направления
         isLeft = !isLeft;
     }
@@ -127,17 +125,10 @@ public class SphereService
                     if (touch.phase == TouchPhase.Began)
                     {
                         // Меняем направление шара на противоположное
-                        ToggleBoolean();
-                        // Звук смены направления.
-                        ChangeDirectionSound();
+                        SphereController.onChangeSphereDirection?.Invoke();
                     }
                 }
             }
         }
-    }
-
-    private void ChangeDirectionSound()
-    {
-        GameController.instance.audioSource.PlayOneShot(SphereController.instance.clickSound);
     }
 }

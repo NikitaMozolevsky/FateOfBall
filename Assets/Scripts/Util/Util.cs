@@ -2,6 +2,9 @@
 
 
 using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
+using UnityEditor;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -34,7 +37,7 @@ public class Util
     }
     
     // Метод для поиска объектов с определенным компонентом
-    public void FindObjectsWithComponent<T>() where T : Component
+    public static void FindObjectsWithComponent<T>() where T : Component
     {
         // Найти все объекты в сцене
         GameObject[] allObjects = Object.FindObjectsOfType<GameObject>();
@@ -65,5 +68,4 @@ public class Util
             Debug.Log($"Object with {typeof(T).Name}: {obj.name}");
         }
     }
-
 }

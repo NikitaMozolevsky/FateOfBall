@@ -1,38 +1,36 @@
 ﻿
 
-    using System.Collections;
-    using UnityEngine;
-    using UnityEngine.Events;
-    using UnityEngine.SceneManagement;
+using System.Collections;
+using UnityEngine;
 
-    public class GameService
+public class GameService
+{
+    
+    private static GameService _instance;
+    
+    // Становится true при нажатии play.
+    public static bool playCondition = false;
+    public static bool loseCondition = false;
+    // Маркер генерации платформ.
+    public bool platformGeneration = true;
+    // Переменные для управлением временем.
+    private int stopTime = 0;
+    private int continueTime = 1;
+    private GameService()
     {
-        
-        private static GameService _instance;
-        
-        // Становится true при нажатии play.
-        public static bool playCondition = false;
-        public static bool loseCondition = false;
-        // Маркер генерации платформ.
-        public bool platformGeneration = true;
-        // Переменные для управлением временем.
-        private int stopTime = 0;
-        private int continueTime = 1;
-        private GameService()
-        {
-        }
+    }
 
-        public static GameService instance
+    public static GameService instance
+    {
+        get
         {
-            get
+            if (_instance == null)
             {
-                if (_instance == null)
-                {
-                    _instance = new GameService();
-                }
-                return _instance;
+                _instance = new GameService();
             }
+            return _instance;
         }
+    }
     
     public void StopTime()
     {
@@ -103,10 +101,5 @@
         platformGeneration = false;
         playCondition = false;
         loseCondition = true;
-    }
-
-    public static void PlaySound(AudioClip audioClip)
-    {
-        GameController.instance.audioSource.PlayOneShot(audioClip);
     }
 }
